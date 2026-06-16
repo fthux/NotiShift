@@ -126,15 +126,26 @@ final class PreferencesWindowController: NSWindowController {
     let pauseButton = NSButton(title: L10n.text("preferences.pauseForOneHour"), target: self, action: #selector(pauseForOneHour))
     let resumeButton = NSButton(title: L10n.text("preferences.resumeNow"), target: self, action: #selector(resumeNow))
 
-    stack.addArrangedSubview(launchAtLoginButton)
-    stack.addArrangedSubview(languageRow)
-    stack.addArrangedSubview(positionPickerLabel)
-    stack.addArrangedSubview(makePositionPicker())
-    stack.addArrangedSubview(pauseStatusLabel)
-    stack.addArrangedSubview(pauseButton)
-    stack.addArrangedSubview(resumeButton)
-    stack.addArrangedSubview(automaticUpdatesButton)
-    stack.addArrangedSubview(checkUpdatesButton)
+    stack.addArrangedSubview(makeGroup([
+      launchAtLoginButton,
+      automaticUpdatesButton,
+      checkUpdatesButton,
+    ]))
+    stack.addArrangedSubview(makeSeparator())
+    stack.addArrangedSubview(makeGroup([
+      languageRow,
+    ]))
+    stack.addArrangedSubview(makeSeparator())
+    stack.addArrangedSubview(makeGroup([
+      positionPickerLabel,
+      makePositionPicker(),
+    ]))
+    stack.addArrangedSubview(makeSeparator())
+    stack.addArrangedSubview(makeGroup([
+      pauseStatusLabel,
+      pauseButton,
+      resumeButton,
+    ]))
     pin(stack, to: view)
     return view
   }
@@ -149,12 +160,17 @@ final class PreferencesWindowController: NSWindowController {
     testNotificationResultLabel.maximumNumberOfLines = 0
     testNotificationResultLabel.preferredMaxLayoutWidth = 420
 
-    stack.addArrangedSubview(accessibilityStatusLabel)
-    stack.addArrangedSubview(makeActionRow(title: L10n.text("preferences.openAccessibilitySettings"), symbolName: "accessibility", action: #selector(openAccessibilitySettings)))
-    stack.addArrangedSubview(makeActionRow(title: L10n.text("preferences.openNotificationSettings"), symbolName: "bell.badge", action: #selector(openNotificationSettings)))
-    stack.addArrangedSubview(makeActionRow(title: L10n.text("preferences.retryPermissionCheck"), symbolName: "arrow.clockwise", action: #selector(retryPermissionCheck)))
-    stack.addArrangedSubview(makeActionRow(title: L10n.text("preferences.sendTestNotification"), symbolName: "paperplane", action: #selector(sendTestNotification)))
-    stack.addArrangedSubview(testNotificationResultLabel)
+    stack.addArrangedSubview(makeGroup([
+      accessibilityStatusLabel,
+      makeActionRow(title: L10n.text("preferences.openAccessibilitySettings"), symbolName: "accessibility", action: #selector(openAccessibilitySettings)),
+      makeActionRow(title: L10n.text("preferences.retryPermissionCheck"), symbolName: "arrow.clockwise", action: #selector(retryPermissionCheck)),
+    ]))
+    stack.addArrangedSubview(makeSeparator())
+    stack.addArrangedSubview(makeGroup([
+      makeActionRow(title: L10n.text("preferences.openNotificationSettings"), symbolName: "bell.badge", action: #selector(openNotificationSettings)),
+      makeActionRow(title: L10n.text("preferences.sendTestNotification"), symbolName: "paperplane", action: #selector(sendTestNotification)),
+      testNotificationResultLabel,
+    ]))
     pin(stack, to: view)
     return view
   }
@@ -165,13 +181,34 @@ final class PreferencesWindowController: NSWindowController {
 
     debugLoggingButton.target = self
     debugLoggingButton.action = #selector(toggleDebugLogging)
-    stack.addArrangedSubview(debugLoggingButton)
-    stack.addArrangedSubview(makeActionRow(title: L10n.text("preferences.restartWatcher"), symbolName: "arrow.triangle.2.circlepath", action: #selector(restartWatcher)))
-    stack.addArrangedSubview(makeActionRow(title: L10n.text("preferences.openLogFile"), symbolName: "doc.text.magnifyingglass", action: #selector(openLogFile)))
-    stack.addArrangedSubview(makeActionRow(title: L10n.text("preferences.copyDiagnosticsSummary"), symbolName: "doc.on.doc", action: #selector(copyDiagnosticsSummary)))
-    stack.addArrangedSubview(makeActionRow(title: L10n.text("preferences.exportDiagnostics"), symbolName: "square.and.arrow.up", action: #selector(exportDiagnostics)))
+    stack.addArrangedSubview(makeGroup([
+      debugLoggingButton,
+      makeActionRow(title: L10n.text("preferences.restartWatcher"), symbolName: "arrow.triangle.2.circlepath", action: #selector(restartWatcher)),
+    ]))
+    stack.addArrangedSubview(makeSeparator())
+    stack.addArrangedSubview(makeGroup([
+      makeActionRow(title: L10n.text("preferences.openLogFile"), symbolName: "doc.text.magnifyingglass", action: #selector(openLogFile)),
+      makeActionRow(title: L10n.text("preferences.copyDiagnosticsSummary"), symbolName: "doc.on.doc", action: #selector(copyDiagnosticsSummary)),
+      makeActionRow(title: L10n.text("preferences.exportDiagnostics"), symbolName: "square.and.arrow.up", action: #selector(exportDiagnostics)),
+    ]))
     pin(stack, to: view)
     return view
+  }
+
+  private func makeGroup(_ views: [NSView]) -> NSStackView {
+    let stack = NSStackView(views: views)
+    stack.orientation = .vertical
+    stack.alignment = .leading
+    stack.spacing = 8
+    return stack
+  }
+
+  private func makeSeparator() -> NSBox {
+    let separator = NSBox()
+    separator.boxType = .separator
+    separator.translatesAutoresizingMaskIntoConstraints = false
+    separator.widthAnchor.constraint(equalToConstant: 420).isActive = true
+    return separator
   }
 
   private func makeActionRow(title: String, symbolName: String, action: Selector) -> NSView {
