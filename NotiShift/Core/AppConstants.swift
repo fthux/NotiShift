@@ -5,6 +5,7 @@ enum AppConstants {
   static let appName = "NotiShift"
   static let bundleIdentifier = "com.fthux.NotiShift"
   static let subsystem = "com.fthux.NotiShift"
+  static let latestReleaseURL = URL(string: "https://api.github.com/repos/fthux/NotiShift/releases/latest")!
   static let childrenChangedNotification = "AXChildrenChanged"
   static let orderedChildrenAttribute = "AXOrderedChildren"
   static let defaultDockPadding: CGFloat = 30

@@ -7,6 +7,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
   private let permissionManager = AccessibilityPermissionManager()
   private let launchAtLoginManager = LaunchAtLoginManager()
   private let testNotificationSender = TestNotificationSender()
+  private let updateChecker = UpdateChecker()
   private let profile = CompatibilityProfile.current
   private lazy var diagnosticsExporter = DiagnosticsExporter(profile: profile)
   private var permissionTimer: Timer?
@@ -17,7 +18,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     preferences: preferences,
     permissionManager: permissionManager,
     launchAtLoginManager: launchAtLoginManager,
-    diagnosticsExporter: diagnosticsExporter
+    diagnosticsExporter: diagnosticsExporter,
+    updateChecker: updateChecker
   )
 
   func applicationDidFinishLaunching(_ notification: Notification) {
@@ -42,6 +44,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
         self?.menuBarControllerDidRequestTestNotification()
       }
     }
+
+    scheduleAutomaticUpdateCheckIfNeeded()
   }
 
   func applicationWillTerminate(_ notification: Notification) {
@@ -181,6 +185,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
   private func schedulePostNotificationRelocation() {
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
       self?.watcher.moveRepeatedly()
+    }
+  }
+
+  private func scheduleAutomaticUpdateCheckIfNeeded() {
+    guard preferences.automaticallyCheckForUpdates else { return }
+    if let lastUpdateCheckAt = preferences.lastUpdateCheckAt,
+      Date().timeIntervalSince(lastUpdateCheckAt) < 24 * 60 * 60
+    {
+      return
+    }
+
+    DispatchQueue.main.asyncAfter(deadline: .now() + 8.0) { [weak self] in
+      guard let self, self.preferences.automaticallyCheckForUpdates else { return }
+      Task { @MainActor in
+        await self.preferencesWindowController.showUpdateCheckResult(showUpToDate: false)
+      }
     }
   }
 

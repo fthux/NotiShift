@@ -21,6 +21,7 @@
 "preferences.launchAtLogin" = "Launch at Login";
 "preferences.language" = "Language";
 "preferences.automaticallyCheckForUpdates" = "Automatically Check for Updates";
+"preferences.checkForUpdatesNow" = "Check for Updates Now";
 "preferences.accessibilityGranted" = "Accessibility Status: Granted";
 "preferences.accessibilityRequired" = "Accessibility Status: Required";
 "preferences.openAccessibilitySettings" = "Open Accessibility Settings";
@@ -43,6 +44,17 @@
 
 "button.openSettings" = "Open Settings";
 "button.ok" = "OK";
+
+"update.upToDateTitle" = "NotiShift is up to date";
+"update.upToDateMessage" = "You are running version %@.";
+"update.availableTitle" = "NotiShift %@ is available";
+"update.availableMessage" = "Current version: %@\nLatest version: %@\n\nOpen the GitHub release page to download and install it manually.";
+"update.openRelease" = "Open GitHub Release";
+"update.errorTitle" = "Could Not Check for Updates";
+"update.errorMissingCurrentVersion" = "The current app version could not be read.";
+"update.errorInvalidReleaseResponse" = "GitHub did not return a usable latest release.";
+"update.errorInvalidReleaseURL" = "The latest release URL is invalid.";
+"update.errorInvalidVersion" = "Could not compare current version %@ with latest version %@.";
 
 "notification.testTitle" = "NotiShift Test";
 "notification.testSubtitle" = "Position check";

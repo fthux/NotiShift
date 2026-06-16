@@ -6,6 +6,7 @@ enum PreferencesKey {
   static let debugLoggingEnabled = "debugLoggingEnabled"
   static let selectedLanguage = "selectedLanguage"
   static let automaticallyCheckForUpdates = "automaticallyCheckForUpdates"
+  static let lastUpdateCheckAt = "lastUpdateCheckAt"
 }
 
 enum AppLanguage: String, CaseIterable {
@@ -70,5 +71,10 @@ final class NotiShiftPreferences {
     set {
       defaults.set(newValue, forKey: PreferencesKey.automaticallyCheckForUpdates)
     }
+  }
+
+  var lastUpdateCheckAt: Date? {
+    get { defaults.object(forKey: PreferencesKey.lastUpdateCheckAt) as? Date }
+    set { defaults.set(newValue, forKey: PreferencesKey.lastUpdateCheckAt) }
   }
 }

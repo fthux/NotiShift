@@ -54,6 +54,20 @@ This repository currently builds an ad-hoc signed app. It is suitable for local 
 but Gatekeeper will not treat it as a trusted public download. A fully smooth public
 download requires Apple Developer ID signing and notarization.
 
+## Updates
+
+NotiShift checks GitHub Releases for new versions and opens the release page when an
+update is available. It does not download, install, or replace the app automatically.
+
+Release tags should use semantic versions with a leading `v`, for example:
+
+```text
+v0.1.1
+```
+
+Attach `NotiShift.app.tar.gz` to the GitHub release and include the SHA256 checksum in
+the release notes or as a separate `.sha256` asset.
+
 ## Compatibility
 
 The app is designed with multiple detection strategies:
