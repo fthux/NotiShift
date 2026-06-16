@@ -21,39 +21,37 @@ final class MenuBarController {
     statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     if let button = statusItem?.button {
       button.image = menuBarImage()
+      button.image?.size = NSSize(width: 18, height: 18)
       button.imagePosition = .imageOnly
     }
     rebuildMenu()
   }
 
   private func menuBarImage() -> NSImage {
-    if #available(macOS 11.0, *),
-      let image = NSImage(systemSymbolName: "bell", accessibilityDescription: "NotiShift")
-    {
-      image.isTemplate = true
-      image.size = NSSize(width: 18, height: 18)
-      return image
-    }
-
     let image = NSImage(size: NSSize(width: 18, height: 18))
     image.lockFocus()
-    NSColor.black.setStroke()
     NSColor.black.setFill()
 
-    let bell = NSBezierPath()
-    bell.lineWidth = 1.7
-    bell.move(to: NSPoint(x: 5.0, y: 6.4))
-    bell.curve(
-      to: NSPoint(x: 13.0, y: 6.4),
-      controlPoint1: NSPoint(x: 5.1, y: 11.4),
-      controlPoint2: NSPoint(x: 12.9, y: 11.4)
+    let upperBlock = NSBezierPath(
+      roundedRect: NSRect(x: 1.8, y: 7.7, width: 8.6, height: 8.2),
+      xRadius: 2.3,
+      yRadius: 2.3
     )
-    bell.line(to: NSPoint(x: 14.2, y: 5.0))
-    bell.line(to: NSPoint(x: 3.8, y: 5.0))
-    bell.close()
-    bell.stroke()
+    upperBlock.fill()
 
-    NSBezierPath(ovalIn: NSRect(x: 7.2, y: 2.3, width: 3.6, height: 3.0)).fill()
+    let lowerBlock = NSBezierPath(
+      roundedRect: NSRect(x: 7.6, y: 2.1, width: 8.6, height: 8.1),
+      xRadius: 2.3,
+      yRadius: 2.3
+    )
+    lowerBlock.fill()
+
+    NSGraphicsContext.current?.compositingOperation = .clear
+    NSBezierPath(ovalIn: NSRect(x: 7.9, y: 7.0, width: 3.7, height: 3.7)).fill()
+    NSGraphicsContext.current?.compositingOperation = .sourceOver
+
+    NSColor.black.setFill()
+    NSBezierPath(ovalIn: NSRect(x: 12.6, y: 11.7, width: 3.2, height: 3.2)).fill()
     image.unlockFocus()
     image.isTemplate = true
     return image
