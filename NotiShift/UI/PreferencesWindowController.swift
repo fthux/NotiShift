@@ -29,6 +29,7 @@ final class PreferencesWindowController: NSWindowController {
   private let languagePopup = NSPopUpButton()
   private let automaticUpdatesButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
   private let accessibilityStatusLabel = NSTextField(labelWithString: "")
+  private let testNotificationResultLabel = NSTextField(wrappingLabelWithString: "")
   private let languageLabel = NSTextField(labelWithString: "")
   private let debugLoggingButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
 
@@ -149,6 +150,10 @@ final class PreferencesWindowController: NSWindowController {
     let stack = makeStackView()
 
     accessibilityStatusLabel.font = NSFont.systemFont(ofSize: NSFont.systemFontSize, weight: .medium)
+    testNotificationResultLabel.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
+    testNotificationResultLabel.textColor = .secondaryLabelColor
+    testNotificationResultLabel.maximumNumberOfLines = 0
+    testNotificationResultLabel.preferredMaxLayoutWidth = 420
 
     let openAccessibilityButton = NSButton(title: L10n.text("preferences.openAccessibilitySettings"), target: self, action: #selector(openAccessibilitySettings))
     let openNotificationButton = NSButton(title: L10n.text("preferences.openNotificationSettings"), target: self, action: #selector(openNotificationSettings))
@@ -160,6 +165,7 @@ final class PreferencesWindowController: NSWindowController {
     stack.addArrangedSubview(openNotificationButton)
     stack.addArrangedSubview(retryButton)
     stack.addArrangedSubview(testButton)
+    stack.addArrangedSubview(testNotificationResultLabel)
     pin(stack, to: view)
     return view
   }
@@ -219,6 +225,9 @@ final class PreferencesWindowController: NSWindowController {
     accessibilityStatusLabel.stringValue = permissionManager.isTrusted
       ? L10n.text("preferences.accessibilityGranted")
       : L10n.text("preferences.accessibilityRequired")
+    testNotificationResultLabel.stringValue = preferences.lastTestNotificationResult.map {
+      String(format: L10n.text("preferences.lastTestResult"), $0)
+    } ?? L10n.text("preferences.lastTestResultNone")
 
     if let index = AppLanguage.allCases.firstIndex(of: preferences.selectedLanguage) {
       languagePopup.selectItem(at: index)

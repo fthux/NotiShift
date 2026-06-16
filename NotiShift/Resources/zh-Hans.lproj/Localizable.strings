@@ -28,6 +28,8 @@
 "preferences.openNotificationSettings" = "打开通知设置";
 "preferences.retryPermissionCheck" = "重新检查权限";
 "preferences.sendTestNotification" = "发送测试通知";
+"preferences.lastTestResult" = "上次测试：%@";
+"preferences.lastTestResultNone" = "上次测试：尚未运行";
 "preferences.debugLogging" = "调试日志";
 "preferences.restartWatcher" = "重启监听器";
 "preferences.openLogFile" = "打开日志文件";
@@ -62,6 +64,12 @@
 "status.granted" = "已授权";
 "status.required" = "需要授权";
 "status.unknown" = "未知";
+
+"testResult.scheduled" = "通知已加入系统队列。重定位：%@。";
+"testResult.authorizationDenied" = "通知权限被拒绝。";
+"testResult.failed" = "通知失败：%@";
+"testResult.relocationReady" = "已就绪";
+"testResult.relocationPermissionRequired" = "需要权限";
 
 "update.upToDateTitle" = "NotiShift 已是最新版本";
 "update.upToDateMessage" = "当前正在使用版本 %@。";

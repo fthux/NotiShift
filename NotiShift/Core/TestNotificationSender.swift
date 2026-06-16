@@ -2,15 +2,27 @@ import Foundation
 import AppKit
 import UserNotifications
 
+enum TestNotificationResult {
+  case scheduled
+  case authorizationDenied
+  case failed(String)
+}
+
 final class TestNotificationSender {
   private let logger = AppLogger.shared
 
-  func send() {
-    logAppNotificationSettings()
-    sendModernUserNotification()
+  func send(completion: @escaping (TestNotificationResult) -> Void) {
+    requestAuthorization { [weak self] result in
+      switch result {
+      case .scheduled:
+        self?.sendModernUserNotification(completion: completion)
+      case .authorizationDenied, .failed:
+        completion(result)
+      }
+    }
   }
 
-  private func logAppNotificationSettings() {
+  private func requestAuthorization(completion: @escaping (TestNotificationResult) -> Void) {
     let center = UNUserNotificationCenter.current()
     let options: UNAuthorizationOptions
     if #available(macOS 12.0, *) {
@@ -22,11 +34,13 @@ final class TestNotificationSender {
     center.requestAuthorization(options: options) { [weak self] granted, error in
       if let error {
         self?.logger.error("Notification authorization failed: \(error.localizedDescription)")
+        completion(.failed(error.localizedDescription))
         return
       }
 
       guard granted else {
         self?.logger.info("Notification authorization denied")
+        completion(.authorizationDenied)
         return
       }
 
@@ -34,6 +48,7 @@ final class TestNotificationSender {
         self?.logger.info(
           "Notification settings authorization=\(settings.authorizationStatus.rawValue) alert=\(settings.alertSetting.rawValue) sound=\(settings.soundSetting.rawValue) alertStyle=\(settings.alertStyle.rawValue)"
         )
+        completion(.scheduled)
       }
     }
   }
@@ -50,7 +65,7 @@ final class TestNotificationSender {
     NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/System Settings.app"))
   }
 
-  private func sendModernUserNotification() {
+  private func sendModernUserNotification(completion: @escaping (TestNotificationResult) -> Void) {
     let center = UNUserNotificationCenter.current()
     let content = UNMutableNotificationContent()
     content.title = L10n.text("notification.testTitle")
@@ -72,8 +87,10 @@ final class TestNotificationSender {
     center.add(request) { [weak self] error in
       if let error {
         self?.logger.error("Failed to deliver modern test notification: \(error.localizedDescription)")
+        completion(.failed(error.localizedDescription))
       } else {
         self?.logger.info("Scheduled modern UNNotification request id=\(request.identifier)")
+        completion(.scheduled)
         center.getPendingNotificationRequests { requests in
           let contains = requests.contains { $0.identifier == request.identifier }
           self?.logger.info("Pending modern notification id=\(request.identifier) present=\(contains)")

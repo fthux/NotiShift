@@ -78,7 +78,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
       watcher.moveRepeatedly()
     }
     NSApp.hide(nil)
-    testNotificationSender.send()
+    testNotificationSender.send { [weak self] result in
+      DispatchQueue.main.async {
+        self?.recordTestNotificationResult(result, canRelocate: canRelocate)
+      }
+    }
     if canRelocate {
       schedulePostNotificationRelocation()
     }
@@ -200,6 +204,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
   private func schedulePostNotificationRelocation() {
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
       self?.watcher.moveRepeatedly()
+    }
+  }
+
+  private func recordTestNotificationResult(_ result: TestNotificationResult, canRelocate: Bool) {
+    let relocationStatus = canRelocate
+      ? L10n.text("testResult.relocationReady")
+      : L10n.text("testResult.relocationPermissionRequired")
+
+    switch result {
+    case .scheduled:
+      preferences.lastTestNotificationResult = String(
+        format: L10n.text("testResult.scheduled"),
+        relocationStatus
+      )
+    case .authorizationDenied:
+      preferences.lastTestNotificationResult = L10n.text("testResult.authorizationDenied")
+    case let .failed(message):
+      preferences.lastTestNotificationResult = String(
+        format: L10n.text("testResult.failed"),
+        message
+      )
     }
   }
 
