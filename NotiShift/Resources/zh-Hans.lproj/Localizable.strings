@@ -41,10 +41,6 @@
 "preferences.copyDiagnosticsSummary" = "复制诊断摘要";
 "preferences.exportDiagnostics" = "导出诊断信息";
 
-"language.system" = "跟随系统";
-"language.english" = "English";
-"language.simplifiedChinese" = "简体中文";
-
 "alert.accessibilityRequired" = "需要辅助功能权限";
 "alert.accessibilityRequiredMessage" = "NotiShift 可以发送测试通知，但在当前应用版本被允许访问“系统设置 > 隐私与安全性 > 辅助功能”之前，无法移动 macOS 通知横幅。";
 "alert.launchAtLoginError" = "登录时启动错误";

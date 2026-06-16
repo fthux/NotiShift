@@ -41,10 +41,6 @@
 "preferences.copyDiagnosticsSummary" = "Copy Diagnostics Summary";
 "preferences.exportDiagnostics" = "Export Diagnostics";
 
-"language.system" = "System";
-"language.english" = "English";
-"language.simplifiedChinese" = "Simplified Chinese";
-
 "alert.accessibilityRequired" = "Accessibility Permission Required";
 "alert.accessibilityRequiredMessage" = "NotiShift can send test notifications, but it cannot move macOS notification banners until the current app build is allowed in System Settings > Privacy & Security > Accessibility.";
 "alert.launchAtLoginError" = "Launch at Login Error";

@@ -20,13 +20,6 @@ final class PreferencesWindowController: NSWindowController {
   private let updateChecker: UpdateChecker
   private let logger = AppLogger.shared
 
-  private let statusSummaryStack = NSStackView()
-  private let enabledStatusLabel = NSTextField(labelWithString: "")
-  private let permissionStatusSummaryLabel = NSTextField(labelWithString: "")
-  private let positionStatusLabel = NSTextField(labelWithString: "")
-  private let pauseStatusSummaryLabel = NSTextField(labelWithString: "")
-  private let displayStatusLabel = NSTextField(labelWithString: "")
-  private let versionStatusLabel = NSTextField(labelWithString: "")
   private let tabView = NSTabView()
   private let launchAtLoginButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
   private let languagePopup = NSPopUpButton()
@@ -53,7 +46,7 @@ final class PreferencesWindowController: NSWindowController {
     self.updateChecker = updateChecker
 
     let window = NSWindow(
-      contentRect: NSRect(x: 0, y: 0, width: 500, height: 360),
+      contentRect: NSRect(x: 0, y: 0, width: 520, height: 390),
       styleMask: [.titled, .closable, .miniaturizable],
       backing: .buffered,
       defer: false
@@ -82,40 +75,26 @@ final class PreferencesWindowController: NSWindowController {
     let contentView = NSView()
     contentView.translatesAutoresizingMaskIntoConstraints = false
 
-    statusSummaryStack.translatesAutoresizingMaskIntoConstraints = false
-    statusSummaryStack.orientation = .vertical
-    statusSummaryStack.alignment = .leading
-    statusSummaryStack.spacing = 4
-    statusSummaryStack.edgeInsets = NSEdgeInsets(top: 10, left: 12, bottom: 10, right: 12)
-    for label in [enabledStatusLabel, permissionStatusSummaryLabel, positionStatusLabel, pauseStatusSummaryLabel, displayStatusLabel, versionStatusLabel] {
-      label.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
-      label.textColor = .secondaryLabelColor
-      statusSummaryStack.addArrangedSubview(label)
-    }
-
     tabView.translatesAutoresizingMaskIntoConstraints = false
-    tabView.addTabViewItem(makeTab(identifier: "general", label: L10n.text("preferences.general"), view: makeGeneralView()))
-    tabView.addTabViewItem(makeTab(identifier: "permissions", label: L10n.text("preferences.permissions"), view: makePermissionsView()))
-    tabView.addTabViewItem(makeTab(identifier: "advanced", label: L10n.text("preferences.advanced"), view: makeAdvancedView()))
-    contentView.addSubview(statusSummaryStack)
+    tabView.addTabViewItem(makeTab(identifier: "general", label: L10n.text("preferences.general"), symbolName: "gearshape", view: makeGeneralView()))
+    tabView.addTabViewItem(makeTab(identifier: "permissions", label: L10n.text("preferences.permissions"), symbolName: "lock.shield", view: makePermissionsView()))
+    tabView.addTabViewItem(makeTab(identifier: "advanced", label: L10n.text("preferences.advanced"), symbolName: "wrench.and.screwdriver", view: makeAdvancedView()))
     contentView.addSubview(tabView)
 
     NSLayoutConstraint.activate([
-      statusSummaryStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-      statusSummaryStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-      statusSummaryStack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
       tabView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
       tabView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-      tabView.topAnchor.constraint(equalTo: statusSummaryStack.bottomAnchor, constant: 12),
+      tabView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
       tabView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
     ])
 
     return contentView
   }
 
-  private func makeTab(identifier: String, label: String, view: NSView) -> NSTabViewItem {
+  private func makeTab(identifier: String, label: String, symbolName: String, view: NSView) -> NSTabViewItem {
     let item = NSTabViewItem(identifier: identifier)
     item.label = label
+    item.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: label)
     item.view = view
     return item
   }
@@ -170,16 +149,11 @@ final class PreferencesWindowController: NSWindowController {
     testNotificationResultLabel.maximumNumberOfLines = 0
     testNotificationResultLabel.preferredMaxLayoutWidth = 420
 
-    let openAccessibilityButton = NSButton(title: L10n.text("preferences.openAccessibilitySettings"), target: self, action: #selector(openAccessibilitySettings))
-    let openNotificationButton = NSButton(title: L10n.text("preferences.openNotificationSettings"), target: self, action: #selector(openNotificationSettings))
-    let retryButton = NSButton(title: L10n.text("preferences.retryPermissionCheck"), target: self, action: #selector(retryPermissionCheck))
-    let testButton = NSButton(title: L10n.text("preferences.sendTestNotification"), target: self, action: #selector(sendTestNotification))
-
     stack.addArrangedSubview(accessibilityStatusLabel)
-    stack.addArrangedSubview(openAccessibilityButton)
-    stack.addArrangedSubview(openNotificationButton)
-    stack.addArrangedSubview(retryButton)
-    stack.addArrangedSubview(testButton)
+    stack.addArrangedSubview(makeActionRow(title: L10n.text("preferences.openAccessibilitySettings"), symbolName: "accessibility", action: #selector(openAccessibilitySettings)))
+    stack.addArrangedSubview(makeActionRow(title: L10n.text("preferences.openNotificationSettings"), symbolName: "bell.badge", action: #selector(openNotificationSettings)))
+    stack.addArrangedSubview(makeActionRow(title: L10n.text("preferences.retryPermissionCheck"), symbolName: "arrow.clockwise", action: #selector(retryPermissionCheck)))
+    stack.addArrangedSubview(makeActionRow(title: L10n.text("preferences.sendTestNotification"), symbolName: "paperplane", action: #selector(sendTestNotification)))
     stack.addArrangedSubview(testNotificationResultLabel)
     pin(stack, to: view)
     return view
@@ -191,18 +165,59 @@ final class PreferencesWindowController: NSWindowController {
 
     debugLoggingButton.target = self
     debugLoggingButton.action = #selector(toggleDebugLogging)
-    let restartButton = NSButton(title: L10n.text("preferences.restartWatcher"), target: self, action: #selector(restartWatcher))
-    let logButton = NSButton(title: L10n.text("preferences.openLogFile"), target: self, action: #selector(openLogFile))
-    let copySummaryButton = NSButton(title: L10n.text("preferences.copyDiagnosticsSummary"), target: self, action: #selector(copyDiagnosticsSummary))
-    let diagnosticsButton = NSButton(title: L10n.text("preferences.exportDiagnostics"), target: self, action: #selector(exportDiagnostics))
-
     stack.addArrangedSubview(debugLoggingButton)
-    stack.addArrangedSubview(restartButton)
-    stack.addArrangedSubview(logButton)
-    stack.addArrangedSubview(copySummaryButton)
-    stack.addArrangedSubview(diagnosticsButton)
+    stack.addArrangedSubview(makeActionRow(title: L10n.text("preferences.restartWatcher"), symbolName: "arrow.triangle.2.circlepath", action: #selector(restartWatcher)))
+    stack.addArrangedSubview(makeActionRow(title: L10n.text("preferences.openLogFile"), symbolName: "doc.text.magnifyingglass", action: #selector(openLogFile)))
+    stack.addArrangedSubview(makeActionRow(title: L10n.text("preferences.copyDiagnosticsSummary"), symbolName: "doc.on.doc", action: #selector(copyDiagnosticsSummary)))
+    stack.addArrangedSubview(makeActionRow(title: L10n.text("preferences.exportDiagnostics"), symbolName: "square.and.arrow.up", action: #selector(exportDiagnostics)))
     pin(stack, to: view)
     return view
+  }
+
+  private func makeActionRow(title: String, symbolName: String, action: Selector) -> NSView {
+    let row = NSButton(title: "", target: self, action: action)
+    row.bezelStyle = .regularSquare
+    row.isBordered = false
+    row.setButtonType(.momentaryChange)
+    row.contentTintColor = .labelColor
+
+    let stack = NSStackView()
+    stack.orientation = .horizontal
+    stack.alignment = .centerY
+    stack.spacing = 10
+    stack.translatesAutoresizingMaskIntoConstraints = false
+
+    let icon = NSImageView()
+    icon.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: title)
+    icon.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 14, weight: .regular)
+    icon.contentTintColor = .secondaryLabelColor
+    icon.widthAnchor.constraint(equalToConstant: 18).isActive = true
+
+    let label = NSTextField(labelWithString: title)
+    label.font = NSFont.systemFont(ofSize: NSFont.systemFontSize)
+
+    let spacer = NSView()
+    let chevron = NSImageView()
+    chevron.image = NSImage(systemSymbolName: "chevron.right", accessibilityDescription: nil)
+    chevron.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 11, weight: .semibold)
+    chevron.contentTintColor = .tertiaryLabelColor
+    chevron.widthAnchor.constraint(equalToConstant: 12).isActive = true
+
+    stack.addArrangedSubview(icon)
+    stack.addArrangedSubview(label)
+    stack.addArrangedSubview(spacer)
+    stack.addArrangedSubview(chevron)
+    row.addSubview(stack)
+
+    NSLayoutConstraint.activate([
+      row.heightAnchor.constraint(equalToConstant: 30),
+      row.widthAnchor.constraint(equalToConstant: 420),
+      stack.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 8),
+      stack.trailingAnchor.constraint(equalTo: row.trailingAnchor, constant: -8),
+      stack.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+    ])
+
+    return row
   }
 
   private func makePositionPicker() -> NSGridView {
@@ -260,7 +275,6 @@ final class PreferencesWindowController: NSWindowController {
     debugLoggingButton.title = L10n.text("preferences.debugLogging")
     refreshPauseStatus()
     rebuildLanguageMenu()
-    refreshStatusSummary()
 
     launchAtLoginButton.state = launchAtLoginManager.isEnabled ? .on : .off
     automaticUpdatesButton.state = preferences.automaticallyCheckForUpdates ? .on : .off
@@ -295,33 +309,6 @@ final class PreferencesWindowController: NSWindowController {
       preferences.pauseUntil = nil
       pauseStatusLabel.stringValue = L10n.text("preferences.notPaused")
     }
-  }
-
-  private func refreshStatusSummary() {
-    enabledStatusLabel.stringValue = String(
-      format: L10n.text("status.enabled"),
-      preferences.isEnabled ? L10n.text("status.on") : L10n.text("status.off")
-    )
-    permissionStatusSummaryLabel.stringValue = String(
-      format: L10n.text("status.accessibility"),
-      permissionManager.isTrusted ? L10n.text("status.granted") : L10n.text("status.required")
-    )
-    positionStatusLabel.stringValue = String(
-      format: L10n.text("status.position"),
-      preferences.selectedPosition.displayName
-    )
-    pauseStatusSummaryLabel.stringValue = String(
-      format: L10n.text("status.pause"),
-      pauseStatusText()
-    )
-    displayStatusLabel.stringValue = String(
-      format: L10n.text("status.displays"),
-      NSScreen.screens.count
-    )
-    versionStatusLabel.stringValue = String(
-      format: L10n.text("status.version"),
-      Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? L10n.text("status.unknown")
-    )
   }
 
   private func rebuildLanguageMenu() {
