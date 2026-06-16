@@ -34,6 +34,7 @@
 "preferences.debugLogging" = "Debug Logging";
 "preferences.restartWatcher" = "Restart Watcher";
 "preferences.openLogFile" = "Open Log File";
+"preferences.copyDiagnosticsSummary" = "Copy Diagnostics Summary";
 "preferences.exportDiagnostics" = "Export Diagnostics";
 
 "language.system" = "System";
@@ -71,6 +72,9 @@
 "testResult.failed" = "Notification failed: %@";
 "testResult.relocationReady" = "ready";
 "testResult.relocationPermissionRequired" = "permission required";
+
+"diagnosticsSummary.copiedTitle" = "Diagnostics Summary Copied";
+"diagnosticsSummary.copiedMessage" = "The diagnostics summary has been copied to the clipboard.";
 
 "update.upToDateTitle" = "NotiShift is up to date";
 "update.upToDateMessage" = "You are running version %@.";

@@ -183,11 +183,13 @@ final class PreferencesWindowController: NSWindowController {
     debugLoggingButton.action = #selector(toggleDebugLogging)
     let restartButton = NSButton(title: L10n.text("preferences.restartWatcher"), target: self, action: #selector(restartWatcher))
     let logButton = NSButton(title: L10n.text("preferences.openLogFile"), target: self, action: #selector(openLogFile))
+    let copySummaryButton = NSButton(title: L10n.text("preferences.copyDiagnosticsSummary"), target: self, action: #selector(copyDiagnosticsSummary))
     let diagnosticsButton = NSButton(title: L10n.text("preferences.exportDiagnostics"), target: self, action: #selector(exportDiagnostics))
 
     stack.addArrangedSubview(debugLoggingButton)
     stack.addArrangedSubview(restartButton)
     stack.addArrangedSubview(logButton)
+    stack.addArrangedSubview(copySummaryButton)
     stack.addArrangedSubview(diagnosticsButton)
     pin(stack, to: view)
     return view
@@ -390,6 +392,12 @@ final class PreferencesWindowController: NSWindowController {
     NSWorkspace.shared.open(logger.logFileURL)
   }
 
+  @objc private func copyDiagnosticsSummary() {
+    NSPasteboard.general.clearContents()
+    NSPasteboard.general.setString(diagnosticsSummary(), forType: .string)
+    showAlert(title: L10n.text("diagnosticsSummary.copiedTitle"), message: L10n.text("diagnosticsSummary.copiedMessage"))
+  }
+
   @objc private func exportDiagnostics() {
     do {
       let url = try diagnosticsExporter.export()
@@ -397,6 +405,30 @@ final class PreferencesWindowController: NSWindowController {
     } catch {
       showAlert(title: L10n.text("alert.diagnosticsError"), message: error.localizedDescription)
     }
+  }
+
+  private func diagnosticsSummary() -> String {
+    let operatingSystemVersion = ProcessInfo.processInfo.operatingSystemVersion
+    let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? L10n.text("status.unknown")
+    let buildVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? L10n.text("status.unknown")
+    let enabled = preferences.isEnabled ? L10n.text("status.on") : L10n.text("status.off")
+    let accessibility = permissionManager.isTrusted ? L10n.text("status.granted") : L10n.text("status.required")
+    let automaticUpdates = preferences.automaticallyCheckForUpdates ? L10n.text("status.on") : L10n.text("status.off")
+    let debugLogging = preferences.debugLoggingEnabled ? L10n.text("status.on") : L10n.text("status.off")
+    let lastTest = preferences.lastTestNotificationResult ?? L10n.text("preferences.lastTestResultNone")
+
+    return """
+    NotiShift Diagnostics Summary
+    App Version: \(appVersion)
+    Build: \(buildVersion)
+    macOS: \(operatingSystemVersion.majorVersion).\(operatingSystemVersion.minorVersion).\(operatingSystemVersion.patchVersion)
+    Enabled: \(enabled)
+    Accessibility: \(accessibility)
+    Position: \(preferences.selectedPosition.displayName)
+    Automatically Check for Updates: \(automaticUpdates)
+    Debug Logging: \(debugLogging)
+    Last Test: \(lastTest)
+    """
   }
 
   private func showAlert(title: String, message: String) {

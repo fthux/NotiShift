@@ -34,6 +34,7 @@
 "preferences.debugLogging" = "调试日志";
 "preferences.restartWatcher" = "重启监听器";
 "preferences.openLogFile" = "打开日志文件";
+"preferences.copyDiagnosticsSummary" = "复制诊断摘要";
 "preferences.exportDiagnostics" = "导出诊断信息";
 
 "language.system" = "跟随系统";
@@ -71,6 +72,9 @@
 "testResult.failed" = "通知失败：%@";
 "testResult.relocationReady" = "已就绪";
 "testResult.relocationPermissionRequired" = "需要权限";
+
+"diagnosticsSummary.copiedTitle" = "已复制诊断摘要";
+"diagnosticsSummary.copiedMessage" = "诊断摘要已复制到剪贴板。";
 
 "update.upToDateTitle" = "NotiShift 已是最新版本";
 "update.upToDateMessage" = "当前正在使用版本 %@。";
