@@ -21,6 +21,10 @@
 "preferences.launchAtLogin" = "Launch at Login";
 "preferences.language" = "Language";
 "preferences.positionPicker" = "Notification Position";
+"preferences.notPaused" = "Not paused";
+"preferences.pauseUntil" = "Paused until %@";
+"preferences.pauseForOneHour" = "Pause for 1 Hour";
+"preferences.resumeNow" = "Resume Now";
 "preferences.automaticallyCheckForUpdates" = "Automatically Check for Updates";
 "preferences.checkForUpdatesNow" = "Check for Updates Now";
 "preferences.accessibilityGranted" = "Accessibility Status: Granted";
@@ -60,6 +64,7 @@
 "status.enabled" = "Enabled: %@";
 "status.accessibility" = "Accessibility: %@";
 "status.position" = "Position: %@";
+"status.pause" = "Pause: %@";
 "status.version" = "Version: %@";
 "status.on" = "On";
 "status.off" = "Off";

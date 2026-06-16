@@ -24,6 +24,7 @@ final class PreferencesWindowController: NSWindowController {
   private let enabledStatusLabel = NSTextField(labelWithString: "")
   private let permissionStatusSummaryLabel = NSTextField(labelWithString: "")
   private let positionStatusLabel = NSTextField(labelWithString: "")
+  private let pauseStatusSummaryLabel = NSTextField(labelWithString: "")
   private let versionStatusLabel = NSTextField(labelWithString: "")
   private let tabView = NSTabView()
   private let launchAtLoginButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
@@ -31,6 +32,7 @@ final class PreferencesWindowController: NSWindowController {
   private let automaticUpdatesButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
   private let positionPickerLabel = NSTextField(labelWithString: "")
   private var positionButtons: [NotificationPosition: NSButton] = [:]
+  private let pauseStatusLabel = NSTextField(labelWithString: "")
   private let accessibilityStatusLabel = NSTextField(labelWithString: "")
   private let testNotificationResultLabel = NSTextField(wrappingLabelWithString: "")
   private let languageLabel = NSTextField(labelWithString: "")
@@ -84,7 +86,7 @@ final class PreferencesWindowController: NSWindowController {
     statusSummaryStack.alignment = .leading
     statusSummaryStack.spacing = 4
     statusSummaryStack.edgeInsets = NSEdgeInsets(top: 10, left: 12, bottom: 10, right: 12)
-    for label in [enabledStatusLabel, permissionStatusSummaryLabel, positionStatusLabel, versionStatusLabel] {
+    for label in [enabledStatusLabel, permissionStatusSummaryLabel, positionStatusLabel, pauseStatusSummaryLabel, versionStatusLabel] {
       label.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
       label.textColor = .secondaryLabelColor
       statusSummaryStack.addArrangedSubview(label)
@@ -139,11 +141,18 @@ final class PreferencesWindowController: NSWindowController {
     automaticUpdatesButton.target = self
     automaticUpdatesButton.action = #selector(toggleAutomaticallyCheckForUpdates)
     let checkUpdatesButton = NSButton(title: L10n.text("preferences.checkForUpdatesNow"), target: self, action: #selector(checkForUpdatesNow))
+    pauseStatusLabel.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
+    pauseStatusLabel.textColor = .secondaryLabelColor
+    let pauseButton = NSButton(title: L10n.text("preferences.pauseForOneHour"), target: self, action: #selector(pauseForOneHour))
+    let resumeButton = NSButton(title: L10n.text("preferences.resumeNow"), target: self, action: #selector(resumeNow))
 
     stack.addArrangedSubview(launchAtLoginButton)
     stack.addArrangedSubview(languageRow)
     stack.addArrangedSubview(positionPickerLabel)
     stack.addArrangedSubview(makePositionPicker())
+    stack.addArrangedSubview(pauseStatusLabel)
+    stack.addArrangedSubview(pauseButton)
+    stack.addArrangedSubview(resumeButton)
     stack.addArrangedSubview(automaticUpdatesButton)
     stack.addArrangedSubview(checkUpdatesButton)
     pin(stack, to: view)
@@ -248,6 +257,7 @@ final class PreferencesWindowController: NSWindowController {
     positionPickerLabel.stringValue = L10n.text("preferences.positionPicker")
     automaticUpdatesButton.title = L10n.text("preferences.automaticallyCheckForUpdates")
     debugLoggingButton.title = L10n.text("preferences.debugLogging")
+    refreshPauseStatus()
     rebuildLanguageMenu()
     refreshStatusSummary()
 
@@ -274,6 +284,18 @@ final class PreferencesWindowController: NSWindowController {
     }
   }
 
+  private func refreshPauseStatus() {
+    if let pauseUntil = preferences.pauseUntil, pauseUntil > Date() {
+      pauseStatusLabel.stringValue = String(
+        format: L10n.text("preferences.pauseUntil"),
+        DateFormatter.localizedString(from: pauseUntil, dateStyle: .none, timeStyle: .short)
+      )
+    } else {
+      preferences.pauseUntil = nil
+      pauseStatusLabel.stringValue = L10n.text("preferences.notPaused")
+    }
+  }
+
   private func refreshStatusSummary() {
     enabledStatusLabel.stringValue = String(
       format: L10n.text("status.enabled"),
@@ -286,6 +308,10 @@ final class PreferencesWindowController: NSWindowController {
     positionStatusLabel.stringValue = String(
       format: L10n.text("status.position"),
       preferences.selectedPosition.displayName
+    )
+    pauseStatusSummaryLabel.stringValue = String(
+      format: L10n.text("status.pause"),
+      pauseStatusText()
     )
     versionStatusLabel.stringValue = String(
       format: L10n.text("status.version"),
@@ -324,6 +350,16 @@ final class PreferencesWindowController: NSWindowController {
 
   @objc private func toggleAutomaticallyCheckForUpdates() {
     preferences.automaticallyCheckForUpdates = automaticUpdatesButton.state == .on
+  }
+
+  @objc private func pauseForOneHour() {
+    preferences.pauseUntil = Date().addingTimeInterval(60 * 60)
+    refresh()
+  }
+
+  @objc private func resumeNow() {
+    preferences.pauseUntil = nil
+    refresh()
   }
 
   @objc private func selectPositionFromPicker(_ sender: NSButton) {
@@ -415,6 +451,7 @@ final class PreferencesWindowController: NSWindowController {
     let accessibility = permissionManager.isTrusted ? L10n.text("status.granted") : L10n.text("status.required")
     let automaticUpdates = preferences.automaticallyCheckForUpdates ? L10n.text("status.on") : L10n.text("status.off")
     let debugLogging = preferences.debugLoggingEnabled ? L10n.text("status.on") : L10n.text("status.off")
+    let pause = pauseStatusText()
     let lastTest = preferences.lastTestNotificationResult ?? L10n.text("preferences.lastTestResultNone")
 
     return """
@@ -425,10 +462,21 @@ final class PreferencesWindowController: NSWindowController {
     Enabled: \(enabled)
     Accessibility: \(accessibility)
     Position: \(preferences.selectedPosition.displayName)
+    Pause: \(pause)
     Automatically Check for Updates: \(automaticUpdates)
     Debug Logging: \(debugLogging)
     Last Test: \(lastTest)
     """
+  }
+
+  private func pauseStatusText() -> String {
+    if let pauseUntil = preferences.pauseUntil, pauseUntil > Date() {
+      return String(
+        format: L10n.text("preferences.pauseUntil"),
+        DateFormatter.localizedString(from: pauseUntil, dateStyle: .none, timeStyle: .short)
+      )
+    }
+    return L10n.text("preferences.notPaused")
   }
 
   private func showAlert(title: String, message: String) {

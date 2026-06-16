@@ -21,6 +21,10 @@
 "preferences.launchAtLogin" = "登录时启动";
 "preferences.language" = "语言";
 "preferences.positionPicker" = "通知位置";
+"preferences.notPaused" = "未暂停";
+"preferences.pauseUntil" = "已暂停至 %@";
+"preferences.pauseForOneHour" = "暂停 1 小时";
+"preferences.resumeNow" = "立即恢复";
 "preferences.automaticallyCheckForUpdates" = "自动检查更新";
 "preferences.checkForUpdatesNow" = "立即检查更新";
 "preferences.accessibilityGranted" = "辅助功能权限：已授权";
@@ -60,6 +64,7 @@
 "status.enabled" = "启用：%@";
 "status.accessibility" = "辅助功能：%@";
 "status.position" = "位置：%@";
+"status.pause" = "暂停：%@";
 "status.version" = "版本：%@";
 "status.on" = "开启";
 "status.off" = "关闭";
