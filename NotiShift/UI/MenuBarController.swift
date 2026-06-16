@@ -4,32 +4,17 @@ import Foundation
 protocol MenuBarControllerDelegate: AnyObject {
   func menuBarControllerDidToggleEnabled()
   func menuBarControllerDidSelectPosition()
-  func menuBarControllerDidRequestTestNotification()
-  func menuBarControllerDidRequestNotificationSettings()
-  func menuBarControllerDidRequestPermissionCheck()
-  func menuBarControllerDidRequestRestartWatcher()
+  func menuBarControllerDidRequestPreferences()
 }
 
 final class MenuBarController {
   weak var delegate: MenuBarControllerDelegate?
 
   private let preferences: NotiShiftPreferences
-  private let permissionManager: AccessibilityPermissionManager
-  private let launchAtLoginManager: LaunchAtLoginManager
-  private let diagnosticsExporter: DiagnosticsExporter
-  private let logger = AppLogger.shared
   private var statusItem: NSStatusItem?
 
-  init(
-    preferences: NotiShiftPreferences,
-    permissionManager: AccessibilityPermissionManager,
-    launchAtLoginManager: LaunchAtLoginManager,
-    diagnosticsExporter: DiagnosticsExporter
-  ) {
+  init(preferences: NotiShiftPreferences) {
     self.preferences = preferences
-    self.permissionManager = permissionManager
-    self.launchAtLoginManager = launchAtLoginManager
-    self.diagnosticsExporter = diagnosticsExporter
   }
 
   func install() {
@@ -82,12 +67,6 @@ final class MenuBarController {
     enabledItem.state = preferences.isEnabled ? .on : .off
     menu.addItem(enabledItem)
 
-    let testItem = NSMenuItem(title: "Send System Notification", action: #selector(sendTestNotification), keyEquivalent: "t")
-    testItem.target = self
-    menu.addItem(testItem)
-
-    menu.addItem(.separator())
-
     let positionItem = NSMenuItem(title: "Position", action: nil, keyEquivalent: "")
     let positionMenu = NSMenu()
     for position in NotificationPosition.allCases {
@@ -100,19 +79,11 @@ final class MenuBarController {
     positionItem.submenu = positionMenu
     menu.addItem(positionItem)
 
-    let permissionsItem = NSMenuItem(title: "Permissions", action: nil, keyEquivalent: "")
-    permissionsItem.submenu = buildPermissionsMenu()
-    menu.addItem(permissionsItem)
-
-    let settingsItem = NSMenuItem(title: "Settings", action: nil, keyEquivalent: "")
-    settingsItem.submenu = buildSettingsMenu()
-    menu.addItem(settingsItem)
-
-    let diagnosticsItem = NSMenuItem(title: "Diagnostics", action: nil, keyEquivalent: "")
-    diagnosticsItem.submenu = buildDiagnosticsMenu()
-    menu.addItem(diagnosticsItem)
-
     menu.addItem(.separator())
+    let preferencesItem = NSMenuItem(title: "Preferences...", action: #selector(showPreferences), keyEquivalent: ",")
+    preferencesItem.target = self
+    menu.addItem(preferencesItem)
+
     let aboutItem = NSMenuItem(title: "About", action: #selector(showAbout), keyEquivalent: "")
     aboutItem.target = self
     menu.addItem(aboutItem)
@@ -122,83 +93,6 @@ final class MenuBarController {
     menu.addItem(quitItem)
 
     statusItem?.menu = menu
-  }
-
-  private func buildPermissionsMenu() -> NSMenu {
-    let menu = NSMenu()
-
-    if permissionManager.isTrusted {
-      let permissionItem = NSMenuItem(title: "Accessibility Permission: Granted", action: nil, keyEquivalent: "")
-      permissionItem.isEnabled = false
-      menu.addItem(permissionItem)
-    } else {
-      let permissionItem = NSMenuItem(
-        title: "Accessibility Permission Required",
-        action: #selector(openAccessibilitySettings),
-        keyEquivalent: ""
-      )
-      permissionItem.target = self
-      menu.addItem(permissionItem)
-
-      let settingsItem = NSMenuItem(title: "Open Accessibility Settings", action: #selector(openAccessibilitySettings), keyEquivalent: "")
-      settingsItem.target = self
-      menu.addItem(settingsItem)
-
-      let retryItem = NSMenuItem(title: "Retry Permission Check", action: #selector(retryPermission), keyEquivalent: "")
-      retryItem.target = self
-      menu.addItem(retryItem)
-    }
-
-    menu.addItem(.separator())
-
-    let notificationItem = NSMenuItem(title: "Open Notification Settings", action: #selector(openNotificationSettings), keyEquivalent: "")
-    notificationItem.target = self
-    menu.addItem(notificationItem)
-
-    return menu
-  }
-
-  private func buildSettingsMenu() -> NSMenu {
-    let menu = NSMenu()
-
-    let loginItem = NSMenuItem(title: "Launch at Login", action: #selector(toggleLaunchAtLogin(_:)), keyEquivalent: "")
-    loginItem.target = self
-    loginItem.state = launchAtLoginManager.isEnabled ? .on : .off
-    menu.addItem(loginItem)
-
-    return menu
-  }
-
-  private func buildDiagnosticsMenu() -> NSMenu {
-    let menu = NSMenu()
-
-    let debugItem = NSMenuItem(title: "Debug Logging", action: #selector(toggleDebugLogging(_:)), keyEquivalent: "")
-    debugItem.target = self
-    debugItem.state = preferences.debugLoggingEnabled ? .on : .off
-    menu.addItem(debugItem)
-
-    let restartItem = NSMenuItem(title: "Restart Watcher", action: #selector(restartWatcher), keyEquivalent: "")
-    restartItem.target = self
-    menu.addItem(restartItem)
-
-    let logItem = NSMenuItem(title: "Open Log File", action: #selector(openLogFile), keyEquivalent: "")
-    logItem.target = self
-    menu.addItem(logItem)
-
-    let diagnosticsItem = NSMenuItem(title: "Export Diagnostics", action: #selector(exportDiagnostics), keyEquivalent: "")
-    diagnosticsItem.target = self
-    menu.addItem(diagnosticsItem)
-
-    return menu
-  }
-
-  @objc private func openAccessibilitySettings() {
-    permissionManager.openAccessibilitySettings()
-  }
-
-  @objc private func retryPermission() {
-    delegate?.menuBarControllerDidRequestPermissionCheck()
-    rebuildMenu()
   }
 
   @objc private func toggleEnabled(_ sender: NSMenuItem) {
@@ -215,44 +109,8 @@ final class MenuBarController {
     rebuildMenu()
   }
 
-  @objc private func sendTestNotification() {
-    delegate?.menuBarControllerDidRequestTestNotification()
-  }
-
-  @objc private func openNotificationSettings() {
-    delegate?.menuBarControllerDidRequestNotificationSettings()
-  }
-
-  @objc private func toggleLaunchAtLogin(_ sender: NSMenuItem) {
-    do {
-      try launchAtLoginManager.setEnabled(!launchAtLoginManager.isEnabled)
-      rebuildMenu()
-    } catch {
-      showAlert(title: "Launch at Login Error", message: error.localizedDescription)
-    }
-  }
-
-  @objc private func toggleDebugLogging(_ sender: NSMenuItem) {
-    preferences.debugLoggingEnabled.toggle()
-    sender.state = preferences.debugLoggingEnabled ? .on : .off
-    rebuildMenu()
-  }
-
-  @objc private func restartWatcher() {
-    delegate?.menuBarControllerDidRequestRestartWatcher()
-  }
-
-  @objc private func openLogFile() {
-    NSWorkspace.shared.open(logger.logFileURL)
-  }
-
-  @objc private func exportDiagnostics() {
-    do {
-      let url = try diagnosticsExporter.export()
-      NSWorkspace.shared.activateFileViewerSelecting([url])
-    } catch {
-      showAlert(title: "Diagnostics Error", message: error.localizedDescription)
-    }
+  @objc private func showPreferences() {
+    delegate?.menuBarControllerDidRequestPreferences()
   }
 
   @objc private func showAbout() {
@@ -262,13 +120,5 @@ final class MenuBarController {
 
   @objc private func quit() {
     NSApp.terminate(nil)
-  }
-
-  private func showAlert(title: String, message: String) {
-    let alert = NSAlert()
-    alert.messageText = title
-    alert.informativeText = message
-    alert.addButton(withTitle: "OK")
-    alert.runModal()
   }
 }

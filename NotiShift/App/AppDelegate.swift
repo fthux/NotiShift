@@ -2,19 +2,22 @@ import AppKit
 import Foundation
 import UserNotifications
 
-final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDelegate, UNUserNotificationCenterDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDelegate, PreferencesWindowControllerDelegate, UNUserNotificationCenterDelegate {
   private let preferences = NotiShiftPreferences.shared
   private let permissionManager = AccessibilityPermissionManager()
+  private let launchAtLoginManager = LaunchAtLoginManager()
   private let testNotificationSender = TestNotificationSender()
   private let profile = CompatibilityProfile.current
+  private lazy var diagnosticsExporter = DiagnosticsExporter(profile: profile)
   private var permissionTimer: Timer?
   private var watcherIsStarted = false
   private lazy var watcher = NotificationCenterWatcher(profile: profile, preferences: preferences)
-  private lazy var menuBarController = MenuBarController(
+  private lazy var menuBarController = MenuBarController(preferences: preferences)
+  private lazy var preferencesWindowController = PreferencesWindowController(
     preferences: preferences,
     permissionManager: permissionManager,
-    launchAtLoginManager: LaunchAtLoginManager(),
-    diagnosticsExporter: DiagnosticsExporter(profile: profile)
+    launchAtLoginManager: launchAtLoginManager,
+    diagnosticsExporter: diagnosticsExporter
   )
 
   func applicationDidFinishLaunching(_ notification: Notification) {
@@ -23,6 +26,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     UNUserNotificationCenter.current().delegate = self
     menuBarController.delegate = self
     menuBarController.install()
+    preferencesWindowController.preferencesDelegate = self
     _ = permissionManager.requestIfNeeded(prompt: true)
 
     if permissionManager.isTrusted {
@@ -77,6 +81,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     testNotificationSender.openNotificationSettings()
   }
 
+  func menuBarControllerDidRequestPreferences() {
+    preferencesWindowController.showWindow(nil)
+  }
+
   func menuBarControllerDidRequestPermissionCheck() {
     _ = permissionManager.requestIfNeeded(prompt: false)
     if permissionManager.isTrusted {
@@ -91,6 +99,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
       return
     }
     watcher.restart()
+  }
+
+  func preferencesDidRequestPermissionCheck() {
+    menuBarControllerDidRequestPermissionCheck()
+  }
+
+  func preferencesDidRequestNotificationSettings() {
+    menuBarControllerDidRequestNotificationSettings()
+  }
+
+  func preferencesDidRequestTestNotification() {
+    menuBarControllerDidRequestTestNotification()
+  }
+
+  func preferencesDidRequestRestartWatcher() {
+    menuBarControllerDidRequestRestartWatcher()
   }
 
   private func startWatcherIfNeeded() {
