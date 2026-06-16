@@ -8,6 +8,7 @@ enum PreferencesKey {
   static let automaticallyCheckForUpdates = "automaticallyCheckForUpdates"
   static let lastUpdateCheckAt = "lastUpdateCheckAt"
   static let hasCompletedOnboarding = "hasCompletedOnboarding"
+  static let lastOnboardingPromptVersion = "lastOnboardingPromptVersion"
   static let lastTestNotificationResult = "lastTestNotificationResult"
   static let pauseUntil = "pauseUntil"
 }
@@ -84,6 +85,11 @@ final class NotiShiftPreferences {
   var hasCompletedOnboarding: Bool {
     get { defaults.bool(forKey: PreferencesKey.hasCompletedOnboarding) }
     set { defaults.set(newValue, forKey: PreferencesKey.hasCompletedOnboarding) }
+  }
+
+  var lastOnboardingPromptVersion: String? {
+    get { defaults.string(forKey: PreferencesKey.lastOnboardingPromptVersion) }
+    set { defaults.set(newValue, forKey: PreferencesKey.lastOnboardingPromptVersion) }
   }
 
   var lastTestNotificationResult: String? {

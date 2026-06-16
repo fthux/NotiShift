@@ -250,10 +250,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
   }
 
   private func showOnboardingIfNeeded() {
-    guard !preferences.hasCompletedOnboarding else { return }
+    guard shouldShowOnboarding else { return }
+    preferences.lastOnboardingPromptVersion = currentAppVersion
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
       self?.onboardingWindowController.showWindow(nil)
     }
+  }
+
+  private var shouldShowOnboarding: Bool {
+    if !preferences.hasCompletedOnboarding {
+      return true
+    }
+    guard !permissionManager.isTrusted else {
+      return false
+    }
+    return preferences.lastOnboardingPromptVersion != currentAppVersion
+  }
+
+  private var currentAppVersion: String {
+    Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown"
   }
 
   func userNotificationCenter(
