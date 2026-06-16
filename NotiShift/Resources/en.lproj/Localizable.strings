@@ -20,6 +20,7 @@
 "preferences.advanced" = "Advanced";
 "preferences.launchAtLogin" = "Launch at Login";
 "preferences.language" = "Language";
+"preferences.positionPicker" = "Notification Position";
 "preferences.automaticallyCheckForUpdates" = "Automatically Check for Updates";
 "preferences.checkForUpdatesNow" = "Check for Updates Now";
 "preferences.accessibilityGranted" = "Accessibility Status: Granted";

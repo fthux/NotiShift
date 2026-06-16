@@ -2,6 +2,7 @@ import AppKit
 import Foundation
 
 protocol PreferencesWindowControllerDelegate: AnyObject {
+  func preferencesDidSelectPosition()
   func preferencesDidRequestPermissionCheck()
   func preferencesDidRequestNotificationSettings()
   func preferencesDidRequestTestNotification()
@@ -28,6 +29,8 @@ final class PreferencesWindowController: NSWindowController {
   private let launchAtLoginButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
   private let languagePopup = NSPopUpButton()
   private let automaticUpdatesButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
+  private let positionPickerLabel = NSTextField(labelWithString: "")
+  private var positionButtons: [NotificationPosition: NSButton] = [:]
   private let accessibilityStatusLabel = NSTextField(labelWithString: "")
   private let testNotificationResultLabel = NSTextField(wrappingLabelWithString: "")
   private let languageLabel = NSTextField(labelWithString: "")
@@ -139,6 +142,8 @@ final class PreferencesWindowController: NSWindowController {
 
     stack.addArrangedSubview(launchAtLoginButton)
     stack.addArrangedSubview(languageRow)
+    stack.addArrangedSubview(positionPickerLabel)
+    stack.addArrangedSubview(makePositionPicker())
     stack.addArrangedSubview(automaticUpdatesButton)
     stack.addArrangedSubview(checkUpdatesButton)
     pin(stack, to: view)
@@ -188,6 +193,30 @@ final class PreferencesWindowController: NSWindowController {
     return view
   }
 
+  private func makePositionPicker() -> NSGridView {
+    let rows: [[NotificationPosition]] = [
+      [.topLeft, .topCenter, .topRight],
+      [.middleLeft, .center, .middleRight],
+      [.bottomLeft, .bottomCenter, .bottomRight],
+    ]
+    let buttons = rows.map { row in
+      row.map { position in
+        let button = NSButton(title: position.displayName, target: self, action: #selector(selectPositionFromPicker(_:)))
+        button.bezelStyle = .texturedRounded
+        button.setButtonType(.toggle)
+        button.tag = NotificationPosition.allCases.firstIndex(of: position) ?? 0
+        button.widthAnchor.constraint(equalToConstant: 120).isActive = true
+        positionButtons[position] = button
+        return button
+      }
+    }
+
+    let grid = NSGridView(views: buttons)
+    grid.rowSpacing = 6
+    grid.columnSpacing = 6
+    return grid
+  }
+
   private func makeStackView() -> NSStackView {
     let stack = NSStackView()
     stack.translatesAutoresizingMaskIntoConstraints = false
@@ -214,6 +243,7 @@ final class PreferencesWindowController: NSWindowController {
     tabView.tabViewItem(at: 2).label = L10n.text("preferences.advanced")
     launchAtLoginButton.title = L10n.text("preferences.launchAtLogin")
     languageLabel.stringValue = L10n.text("preferences.language")
+    positionPickerLabel.stringValue = L10n.text("preferences.positionPicker")
     automaticUpdatesButton.title = L10n.text("preferences.automaticallyCheckForUpdates")
     debugLoggingButton.title = L10n.text("preferences.debugLogging")
     rebuildLanguageMenu()
@@ -231,6 +261,14 @@ final class PreferencesWindowController: NSWindowController {
 
     if let index = AppLanguage.allCases.firstIndex(of: preferences.selectedLanguage) {
       languagePopup.selectItem(at: index)
+    }
+    refreshPositionPicker()
+  }
+
+  private func refreshPositionPicker() {
+    for (position, button) in positionButtons {
+      button.title = position.displayName
+      button.state = preferences.selectedPosition == position ? .on : .off
     }
   }
 
@@ -284,6 +322,16 @@ final class PreferencesWindowController: NSWindowController {
 
   @objc private func toggleAutomaticallyCheckForUpdates() {
     preferences.automaticallyCheckForUpdates = automaticUpdatesButton.state == .on
+  }
+
+  @objc private func selectPositionFromPicker(_ sender: NSButton) {
+    guard NotificationPosition.allCases.indices.contains(sender.tag) else {
+      return
+    }
+    let position = NotificationPosition.allCases[sender.tag]
+    preferences.selectedPosition = position
+    preferencesDelegate?.preferencesDidSelectPosition()
+    refresh()
   }
 
   @objc private func checkForUpdatesNow() {

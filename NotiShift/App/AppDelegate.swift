@@ -116,6 +116,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     menuBarControllerDidRequestPermissionCheck()
   }
 
+  func preferencesDidSelectPosition() {
+    menuBarControllerDidSelectPosition()
+    menuBarController.rebuildMenu()
+  }
+
   func preferencesDidRequestNotificationSettings() {
     menuBarControllerDidRequestNotificationSettings()
   }
