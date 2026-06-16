@@ -43,7 +43,15 @@
 "alert.diagnosticsError" = "Diagnostics Error";
 
 "button.openSettings" = "Open Settings";
+"button.openAccessibilitySettings" = "Open Accessibility Settings";
+"button.openPreferences" = "Open Preferences";
+"button.continue" = "Continue";
 "button.ok" = "OK";
+
+"onboarding.title" = "Welcome to NotiShift";
+"onboarding.heading" = "Set where notification banners appear";
+"onboarding.body" = "NotiShift runs from the menu bar and moves macOS notification banners to the position you choose.";
+"onboarding.steps" = "1. Grant Accessibility permission.\n2. Choose a notification position from the menu bar icon.\n3. Send a test notification from Preferences > Permissions.";
 
 "update.upToDateTitle" = "NotiShift is up to date";
 "update.upToDateMessage" = "You are running version %@.";

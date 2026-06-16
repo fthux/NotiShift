@@ -2,7 +2,7 @@ import AppKit
 import Foundation
 import UserNotifications
 
-final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDelegate, PreferencesWindowControllerDelegate, UNUserNotificationCenterDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDelegate, PreferencesWindowControllerDelegate, OnboardingWindowControllerDelegate, UNUserNotificationCenterDelegate {
   private let preferences = NotiShiftPreferences.shared
   private let permissionManager = AccessibilityPermissionManager()
   private let launchAtLoginManager = LaunchAtLoginManager()
@@ -21,6 +21,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     diagnosticsExporter: diagnosticsExporter,
     updateChecker: updateChecker
   )
+  private lazy var onboardingWindowController = OnboardingWindowController()
 
   func applicationDidFinishLaunching(_ notification: Notification) {
     AppLogger.shared.info("NotiShift launch started profile=\(profile.generation.rawValue)")
@@ -29,6 +30,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     menuBarController.delegate = self
     menuBarController.install()
     preferencesWindowController.preferencesDelegate = self
+    onboardingWindowController.onboardingDelegate = self
     _ = permissionManager.requestIfNeeded(prompt: true)
 
     if permissionManager.isTrusted {
@@ -46,6 +48,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     }
 
     scheduleAutomaticUpdateCheckIfNeeded()
+    showOnboardingIfNeeded()
   }
 
   func applicationWillTerminate(_ notification: Notification) {
@@ -125,6 +128,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     menuBarController.rebuildMenu()
   }
 
+  func onboardingDidRequestAccessibilitySettings() {
+    permissionManager.openAccessibilitySettings()
+  }
+
+  func onboardingDidRequestPreferences() {
+    menuBarControllerDidRequestPreferences()
+  }
+
+  func onboardingDidFinish() {
+    preferences.hasCompletedOnboarding = true
+  }
+
   private func startWatcherIfNeeded() {
     guard !watcherIsStarted else { return }
     watcherIsStarted = true
@@ -201,6 +216,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
       Task { @MainActor in
         await self.preferencesWindowController.showUpdateCheckResult(showUpToDate: false)
       }
+    }
+  }
+
+  private func showOnboardingIfNeeded() {
+    guard !preferences.hasCompletedOnboarding else { return }
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+      self?.onboardingWindowController.showWindow(nil)
     }
   }
 
