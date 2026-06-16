@@ -1,0 +1,177 @@
+import AppKit
+import Foundation
+import UserNotifications
+
+final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDelegate, UNUserNotificationCenterDelegate {
+  private let preferences = NotiShiftPreferences.shared
+  private let permissionManager = AccessibilityPermissionManager()
+  private let testNotificationSender = TestNotificationSender()
+  private let profile = CompatibilityProfile.current
+  private var permissionTimer: Timer?
+  private var watcherIsStarted = false
+  private lazy var watcher = NotificationCenterWatcher(profile: profile, preferences: preferences)
+  private lazy var menuBarController = MenuBarController(
+    preferences: preferences,
+    permissionManager: permissionManager,
+    launchAtLoginManager: LaunchAtLoginManager(),
+    diagnosticsExporter: DiagnosticsExporter(profile: profile)
+  )
+
+  func applicationDidFinishLaunching(_ notification: Notification) {
+    AppLogger.shared.info("NotiShift launch started profile=\(profile.generation.rawValue)")
+    NSApp.setActivationPolicy(.accessory)
+    UNUserNotificationCenter.current().delegate = self
+    menuBarController.delegate = self
+    menuBarController.install()
+    _ = permissionManager.requestIfNeeded(prompt: true)
+
+    if permissionManager.isTrusted {
+      startWatcherIfNeeded()
+    } else {
+      AppLogger.shared.info("Accessibility permission missing")
+      startPermissionPolling()
+    }
+    menuBarController.rebuildMenu()
+
+    if CommandLine.arguments.contains("--send-system-notification") {
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
+        self?.menuBarControllerDidRequestTestNotification()
+      }
+    }
+  }
+
+  func applicationWillTerminate(_ notification: Notification) {
+    permissionTimer?.invalidate()
+    watcher.stop()
+  }
+
+  func menuBarControllerDidToggleEnabled() {
+    if ensureAccessibilityForRelocation(action: "toggle enabled") {
+      watcher.moveAll()
+      watcher.moveRepeatedly()
+    }
+  }
+
+  func menuBarControllerDidSelectPosition() {
+    if ensureAccessibilityForRelocation(action: "select position") {
+      watcher.restart()
+      watcher.moveAll()
+      watcher.moveRepeatedly()
+    }
+  }
+
+  func menuBarControllerDidRequestTestNotification() {
+    let canRelocate = ensureAccessibilityForRelocation(action: "send system notification")
+    if canRelocate {
+      watcher.moveAll()
+      watcher.moveRepeatedly()
+    }
+    NSApp.hide(nil)
+    testNotificationSender.send()
+    if canRelocate {
+      schedulePostNotificationRelocation()
+    }
+  }
+
+  func menuBarControllerDidRequestNotificationSettings() {
+    testNotificationSender.openNotificationSettings()
+  }
+
+  func menuBarControllerDidRequestPermissionCheck() {
+    _ = permissionManager.requestIfNeeded(prompt: false)
+    if permissionManager.isTrusted {
+      startWatcherIfNeeded()
+    }
+    menuBarController.rebuildMenu()
+  }
+
+  func menuBarControllerDidRequestRestartWatcher() {
+    guard permissionManager.isTrusted else {
+      permissionManager.openAccessibilitySettings()
+      return
+    }
+    watcher.restart()
+  }
+
+  private func startWatcherIfNeeded() {
+    guard !watcherIsStarted else { return }
+    watcherIsStarted = true
+    permissionTimer?.invalidate()
+    permissionTimer = nil
+    watcher.start()
+  }
+
+  private func startPermissionPolling() {
+    guard permissionTimer == nil else { return }
+    permissionTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak self] _ in
+      guard let self else { return }
+      if self.permissionManager.isTrusted {
+        AppLogger.shared.info("Accessibility permission granted")
+        self.startWatcherIfNeeded()
+        self.menuBarController.rebuildMenu()
+      }
+    }
+    RunLoop.current.add(permissionTimer!, forMode: .common)
+  }
+
+  private func ensureAccessibilityForRelocation(action: String) -> Bool {
+    if permissionManager.isTrusted {
+      startWatcherIfNeeded()
+      return true
+    }
+
+    AppLogger.shared.info(
+      "Cannot relocate notification during \(action): Accessibility permission is missing"
+    )
+    _ = permissionManager.requestIfNeeded(prompt: true)
+
+    if permissionManager.isTrusted {
+      AppLogger.shared.info("Accessibility permission granted during \(action)")
+      startWatcherIfNeeded()
+      menuBarController.rebuildMenu()
+      return true
+    }
+
+    showAccessibilityRequiredAlert()
+    startPermissionPolling()
+    menuBarController.rebuildMenu()
+    return false
+  }
+
+  private func showAccessibilityRequiredAlert() {
+    let alert = NSAlert()
+    alert.messageText = "Accessibility Permission Required"
+    alert.informativeText =
+      "NotiShift can send test notifications, but it cannot move macOS notification banners until the current app build is allowed in System Settings > Privacy & Security > Accessibility."
+    alert.addButton(withTitle: "Open Settings")
+    alert.addButton(withTitle: "OK")
+
+    if alert.runModal() == .alertFirstButtonReturn {
+      permissionManager.openAccessibilitySettings()
+    }
+  }
+
+  private func schedulePostNotificationRelocation() {
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+      self?.watcher.moveRepeatedly()
+    }
+  }
+
+  func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    willPresent notification: UNNotification,
+    withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+  ) {
+    AppLogger.shared.info("Presenting foreground notification via completion id=\(notification.request.identifier)")
+    completionHandler([.banner, .list, .sound])
+  }
+
+  func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    didReceive response: UNNotificationResponse,
+    withCompletionHandler completionHandler: @escaping () -> Void
+  ) {
+    AppLogger.shared.info("Received notification response id=\(response.notification.request.identifier)")
+    completionHandler()
+  }
+}

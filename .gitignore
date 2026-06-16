@@ -1,0 +1,40 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# Xcode / Swift
+.build/
+DerivedData/
+*.xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM/
+*.dSYM.zip
+
+# Local build outputs
+build/
+dist/
+*.app
+*.app.tar.gz
+*.zip
+*.dmg
+
+# Swift / Clang module caches
+ModuleCache/
+*.pcm
+
+# Logs and diagnostics
+*.log
+NotiShift-Diagnostics-*.txt
+
+# Signing and local secrets
+*.p12
+*.cer
+*.mobileprovision
+*.provisionprofile
+*.xcconfig.local
