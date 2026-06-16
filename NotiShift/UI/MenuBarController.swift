@@ -62,12 +62,12 @@ final class MenuBarController {
   func rebuildMenu() {
     let menu = NSMenu()
 
-    let enabledItem = NSMenuItem(title: "Enabled", action: #selector(toggleEnabled(_:)), keyEquivalent: "")
+    let enabledItem = NSMenuItem(title: L10n.text("menu.enabled"), action: #selector(toggleEnabled(_:)), keyEquivalent: "")
     enabledItem.target = self
     enabledItem.state = preferences.isEnabled ? .on : .off
     menu.addItem(enabledItem)
 
-    let positionItem = NSMenuItem(title: "Position", action: nil, keyEquivalent: "")
+    let positionItem = NSMenuItem(title: L10n.text("menu.position"), action: nil, keyEquivalent: "")
     let positionMenu = NSMenu()
     for position in NotificationPosition.allCases {
       let item = NSMenuItem(title: position.displayName, action: #selector(selectPosition(_:)), keyEquivalent: "")
@@ -80,15 +80,15 @@ final class MenuBarController {
     menu.addItem(positionItem)
 
     menu.addItem(.separator())
-    let preferencesItem = NSMenuItem(title: "Preferences...", action: #selector(showPreferences), keyEquivalent: ",")
+    let preferencesItem = NSMenuItem(title: L10n.text("menu.preferences"), action: #selector(showPreferences), keyEquivalent: ",")
     preferencesItem.target = self
     menu.addItem(preferencesItem)
 
-    let aboutItem = NSMenuItem(title: "About", action: #selector(showAbout), keyEquivalent: "")
+    let aboutItem = NSMenuItem(title: L10n.text("menu.about"), action: #selector(showAbout), keyEquivalent: "")
     aboutItem.target = self
     menu.addItem(aboutItem)
 
-    let quitItem = NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q")
+    let quitItem = NSMenuItem(title: L10n.text("menu.quit"), action: #selector(quit), keyEquivalent: "q")
     quitItem.target = self
     menu.addItem(quitItem)
 

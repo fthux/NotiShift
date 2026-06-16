@@ -1,0 +1,49 @@
+"menu.enabled" = "Enabled";
+"menu.position" = "Position";
+"menu.preferences" = "Preferences...";
+"menu.about" = "About NotiShift";
+"menu.quit" = "Quit NotiShift";
+
+"position.topLeft" = "Top Left";
+"position.topCenter" = "Top Center";
+"position.topRight" = "Top Right";
+"position.middleLeft" = "Middle Left";
+"position.center" = "Center";
+"position.middleRight" = "Middle Right";
+"position.bottomLeft" = "Bottom Left";
+"position.bottomCenter" = "Bottom Center";
+"position.bottomRight" = "Bottom Right";
+
+"preferences.title" = "Preferences";
+"preferences.general" = "General";
+"preferences.permissions" = "Permissions";
+"preferences.advanced" = "Advanced";
+"preferences.launchAtLogin" = "Launch at Login";
+"preferences.language" = "Language";
+"preferences.automaticallyCheckForUpdates" = "Automatically Check for Updates";
+"preferences.accessibilityGranted" = "Accessibility Status: Granted";
+"preferences.accessibilityRequired" = "Accessibility Status: Required";
+"preferences.openAccessibilitySettings" = "Open Accessibility Settings";
+"preferences.openNotificationSettings" = "Open Notification Settings";
+"preferences.retryPermissionCheck" = "Retry Permission Check";
+"preferences.sendTestNotification" = "Send Test Notification";
+"preferences.debugLogging" = "Debug Logging";
+"preferences.restartWatcher" = "Restart Watcher";
+"preferences.openLogFile" = "Open Log File";
+"preferences.exportDiagnostics" = "Export Diagnostics";
+
+"language.system" = "System";
+"language.english" = "English";
+"language.simplifiedChinese" = "Simplified Chinese";
+
+"alert.accessibilityRequired" = "Accessibility Permission Required";
+"alert.accessibilityRequiredMessage" = "NotiShift can send test notifications, but it cannot move macOS notification banners until the current app build is allowed in System Settings > Privacy & Security > Accessibility.";
+"alert.launchAtLoginError" = "Launch at Login Error";
+"alert.diagnosticsError" = "Diagnostics Error";
+
+"button.openSettings" = "Open Settings";
+"button.ok" = "OK";
+
+"notification.testTitle" = "NotiShift Test";
+"notification.testSubtitle" = "Position check";
+"notification.testBody" = "This notification should appear at the selected position.";

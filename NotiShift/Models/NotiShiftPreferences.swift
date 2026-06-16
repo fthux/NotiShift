@@ -15,9 +15,9 @@ enum AppLanguage: String, CaseIterable {
 
   var displayName: String {
     switch self {
-    case .system: "System"
-    case .english: "English"
-    case .simplifiedChinese: "简体中文"
+    case .system: L10n.text("language.system")
+    case .english: L10n.text("language.english")
+    case .simplifiedChinese: L10n.text("language.simplifiedChinese")
     }
   }
 }

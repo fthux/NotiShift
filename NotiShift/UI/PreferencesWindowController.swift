@@ -6,6 +6,7 @@ protocol PreferencesWindowControllerDelegate: AnyObject {
   func preferencesDidRequestNotificationSettings()
   func preferencesDidRequestTestNotification()
   func preferencesDidRequestRestartWatcher()
+  func preferencesDidChangeLanguage()
 }
 
 final class PreferencesWindowController: NSWindowController {
@@ -18,11 +19,12 @@ final class PreferencesWindowController: NSWindowController {
   private let logger = AppLogger.shared
 
   private let tabView = NSTabView()
-  private let launchAtLoginButton = NSButton(checkboxWithTitle: "Launch at Login", target: nil, action: nil)
+  private let launchAtLoginButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
   private let languagePopup = NSPopUpButton()
-  private let automaticUpdatesButton = NSButton(checkboxWithTitle: "Automatically Check for Updates", target: nil, action: nil)
+  private let automaticUpdatesButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
   private let accessibilityStatusLabel = NSTextField(labelWithString: "")
-  private let debugLoggingButton = NSButton(checkboxWithTitle: "Debug Logging", target: nil, action: nil)
+  private let languageLabel = NSTextField(labelWithString: "")
+  private let debugLoggingButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
 
   init(
     preferences: NotiShiftPreferences,
@@ -41,7 +43,7 @@ final class PreferencesWindowController: NSWindowController {
       backing: .buffered,
       defer: false
     )
-    window.title = "Preferences"
+    window.title = L10n.text("preferences.title")
     window.isReleasedWhenClosed = false
     super.init(window: window)
 
@@ -66,9 +68,9 @@ final class PreferencesWindowController: NSWindowController {
     contentView.translatesAutoresizingMaskIntoConstraints = false
 
     tabView.translatesAutoresizingMaskIntoConstraints = false
-    tabView.addTabViewItem(makeTab(identifier: "general", label: "General", view: makeGeneralView()))
-    tabView.addTabViewItem(makeTab(identifier: "permissions", label: "Permissions", view: makePermissionsView()))
-    tabView.addTabViewItem(makeTab(identifier: "advanced", label: "Advanced", view: makeAdvancedView()))
+    tabView.addTabViewItem(makeTab(identifier: "general", label: L10n.text("preferences.general"), view: makeGeneralView()))
+    tabView.addTabViewItem(makeTab(identifier: "permissions", label: L10n.text("preferences.permissions"), view: makePermissionsView()))
+    tabView.addTabViewItem(makeTab(identifier: "advanced", label: L10n.text("preferences.advanced"), view: makeAdvancedView()))
     contentView.addSubview(tabView)
 
     NSLayoutConstraint.activate([
@@ -100,15 +102,10 @@ final class PreferencesWindowController: NSWindowController {
     languageRow.alignment = .centerY
     languageRow.spacing = 12
 
-    let languageLabel = NSTextField(labelWithString: "Language")
     languageLabel.widthAnchor.constraint(equalToConstant: 160).isActive = true
     languagePopup.target = self
     languagePopup.action = #selector(selectLanguage)
-    languagePopup.removeAllItems()
-    for language in AppLanguage.allCases {
-      languagePopup.addItem(withTitle: language.displayName)
-      languagePopup.lastItem?.representedObject = language.rawValue
-    }
+    rebuildLanguageMenu()
     languageRow.addArrangedSubview(languageLabel)
     languageRow.addArrangedSubview(languagePopup)
 
@@ -128,10 +125,10 @@ final class PreferencesWindowController: NSWindowController {
 
     accessibilityStatusLabel.font = NSFont.systemFont(ofSize: NSFont.systemFontSize, weight: .medium)
 
-    let openAccessibilityButton = NSButton(title: "Open Accessibility Settings", target: self, action: #selector(openAccessibilitySettings))
-    let openNotificationButton = NSButton(title: "Open Notification Settings", target: self, action: #selector(openNotificationSettings))
-    let retryButton = NSButton(title: "Retry Permission Check", target: self, action: #selector(retryPermissionCheck))
-    let testButton = NSButton(title: "Send Test Notification", target: self, action: #selector(sendTestNotification))
+    let openAccessibilityButton = NSButton(title: L10n.text("preferences.openAccessibilitySettings"), target: self, action: #selector(openAccessibilitySettings))
+    let openNotificationButton = NSButton(title: L10n.text("preferences.openNotificationSettings"), target: self, action: #selector(openNotificationSettings))
+    let retryButton = NSButton(title: L10n.text("preferences.retryPermissionCheck"), target: self, action: #selector(retryPermissionCheck))
+    let testButton = NSButton(title: L10n.text("preferences.sendTestNotification"), target: self, action: #selector(sendTestNotification))
 
     stack.addArrangedSubview(accessibilityStatusLabel)
     stack.addArrangedSubview(openAccessibilityButton)
@@ -148,9 +145,9 @@ final class PreferencesWindowController: NSWindowController {
 
     debugLoggingButton.target = self
     debugLoggingButton.action = #selector(toggleDebugLogging)
-    let restartButton = NSButton(title: "Restart Watcher", target: self, action: #selector(restartWatcher))
-    let logButton = NSButton(title: "Open Log File", target: self, action: #selector(openLogFile))
-    let diagnosticsButton = NSButton(title: "Export Diagnostics", target: self, action: #selector(exportDiagnostics))
+    let restartButton = NSButton(title: L10n.text("preferences.restartWatcher"), target: self, action: #selector(restartWatcher))
+    let logButton = NSButton(title: L10n.text("preferences.openLogFile"), target: self, action: #selector(openLogFile))
+    let diagnosticsButton = NSButton(title: L10n.text("preferences.exportDiagnostics"), target: self, action: #selector(exportDiagnostics))
 
     stack.addArrangedSubview(debugLoggingButton)
     stack.addArrangedSubview(restartButton)
@@ -180,15 +177,33 @@ final class PreferencesWindowController: NSWindowController {
   }
 
   private func refresh() {
+    window?.title = L10n.text("preferences.title")
+    tabView.tabViewItem(at: 0).label = L10n.text("preferences.general")
+    tabView.tabViewItem(at: 1).label = L10n.text("preferences.permissions")
+    tabView.tabViewItem(at: 2).label = L10n.text("preferences.advanced")
+    launchAtLoginButton.title = L10n.text("preferences.launchAtLogin")
+    languageLabel.stringValue = L10n.text("preferences.language")
+    automaticUpdatesButton.title = L10n.text("preferences.automaticallyCheckForUpdates")
+    debugLoggingButton.title = L10n.text("preferences.debugLogging")
+    rebuildLanguageMenu()
+
     launchAtLoginButton.state = launchAtLoginManager.isEnabled ? .on : .off
     automaticUpdatesButton.state = preferences.automaticallyCheckForUpdates ? .on : .off
     debugLoggingButton.state = preferences.debugLoggingEnabled ? .on : .off
     accessibilityStatusLabel.stringValue = permissionManager.isTrusted
-      ? "Accessibility Status: Granted"
-      : "Accessibility Status: Required"
+      ? L10n.text("preferences.accessibilityGranted")
+      : L10n.text("preferences.accessibilityRequired")
 
     if let index = AppLanguage.allCases.firstIndex(of: preferences.selectedLanguage) {
       languagePopup.selectItem(at: index)
+    }
+  }
+
+  private func rebuildLanguageMenu() {
+    languagePopup.removeAllItems()
+    for language in AppLanguage.allCases {
+      languagePopup.addItem(withTitle: language.displayName)
+      languagePopup.lastItem?.representedObject = language.rawValue
     }
   }
 
@@ -196,7 +211,7 @@ final class PreferencesWindowController: NSWindowController {
     do {
       try launchAtLoginManager.setEnabled(launchAtLoginButton.state == .on)
     } catch {
-      showAlert(title: "Launch at Login Error", message: error.localizedDescription)
+      showAlert(title: L10n.text("alert.launchAtLoginError"), message: error.localizedDescription)
     }
     refresh()
   }
@@ -209,6 +224,8 @@ final class PreferencesWindowController: NSWindowController {
       return
     }
     preferences.selectedLanguage = language
+    preferencesDelegate?.preferencesDidChangeLanguage()
+    refresh()
   }
 
   @objc private func toggleAutomaticallyCheckForUpdates() {
@@ -249,7 +266,7 @@ final class PreferencesWindowController: NSWindowController {
       let url = try diagnosticsExporter.export()
       NSWorkspace.shared.activateFileViewerSelecting([url])
     } catch {
-      showAlert(title: "Diagnostics Error", message: error.localizedDescription)
+      showAlert(title: L10n.text("alert.diagnosticsError"), message: error.localizedDescription)
     }
   }
 
@@ -257,7 +274,7 @@ final class PreferencesWindowController: NSWindowController {
     let alert = NSAlert()
     alert.messageText = title
     alert.informativeText = message
-    alert.addButton(withTitle: "OK")
+    alert.addButton(withTitle: L10n.text("button.ok"))
     alert.runModal()
   }
 }

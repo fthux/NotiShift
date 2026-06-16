@@ -53,9 +53,9 @@ final class TestNotificationSender {
   private func sendModernUserNotification() {
     let center = UNUserNotificationCenter.current()
     let content = UNMutableNotificationContent()
-    content.title = "NotiShift Test"
-    content.subtitle = "Position check"
-    content.body = "This notification should appear at the selected position."
+    content.title = L10n.text("notification.testTitle")
+    content.subtitle = L10n.text("notification.testSubtitle")
+    content.body = L10n.text("notification.testBody")
     content.sound = .default
     content.threadIdentifier = "notishift-test"
     content.categoryIdentifier = "notishift-test"

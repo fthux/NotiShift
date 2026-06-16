@@ -117,6 +117,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     menuBarControllerDidRequestRestartWatcher()
   }
 
+  func preferencesDidChangeLanguage() {
+    menuBarController.rebuildMenu()
+  }
+
   private func startWatcherIfNeeded() {
     guard !watcherIsStarted else { return }
     watcherIsStarted = true
@@ -164,11 +168,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
 
   private func showAccessibilityRequiredAlert() {
     let alert = NSAlert()
-    alert.messageText = "Accessibility Permission Required"
-    alert.informativeText =
-      "NotiShift can send test notifications, but it cannot move macOS notification banners until the current app build is allowed in System Settings > Privacy & Security > Accessibility."
-    alert.addButton(withTitle: "Open Settings")
-    alert.addButton(withTitle: "OK")
+    alert.messageText = L10n.text("alert.accessibilityRequired")
+    alert.informativeText = L10n.text("alert.accessibilityRequiredMessage")
+    alert.addButton(withTitle: L10n.text("button.openSettings"))
+    alert.addButton(withTitle: L10n.text("button.ok"))
 
     if alert.runModal() == .alertFirstButtonReturn {
       permissionManager.openAccessibilitySettings()

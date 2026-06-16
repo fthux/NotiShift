@@ -1,0 +1,49 @@
+"menu.enabled" = "启用";
+"menu.position" = "位置";
+"menu.preferences" = "偏好设置...";
+"menu.about" = "关于 NotiShift";
+"menu.quit" = "退出 NotiShift";
+
+"position.topLeft" = "左上";
+"position.topCenter" = "顶部居中";
+"position.topRight" = "右上";
+"position.middleLeft" = "左侧居中";
+"position.center" = "居中";
+"position.middleRight" = "右侧居中";
+"position.bottomLeft" = "左下";
+"position.bottomCenter" = "底部居中";
+"position.bottomRight" = "右下";
+
+"preferences.title" = "偏好设置";
+"preferences.general" = "通用";
+"preferences.permissions" = "权限";
+"preferences.advanced" = "高级";
+"preferences.launchAtLogin" = "登录时启动";
+"preferences.language" = "语言";
+"preferences.automaticallyCheckForUpdates" = "自动检查更新";
+"preferences.accessibilityGranted" = "辅助功能权限：已授权";
+"preferences.accessibilityRequired" = "辅助功能权限：需要授权";
+"preferences.openAccessibilitySettings" = "打开辅助功能设置";
+"preferences.openNotificationSettings" = "打开通知设置";
+"preferences.retryPermissionCheck" = "重新检查权限";
+"preferences.sendTestNotification" = "发送测试通知";
+"preferences.debugLogging" = "调试日志";
+"preferences.restartWatcher" = "重启监听器";
+"preferences.openLogFile" = "打开日志文件";
+"preferences.exportDiagnostics" = "导出诊断信息";
+
+"language.system" = "跟随系统";
+"language.english" = "English";
+"language.simplifiedChinese" = "简体中文";
+
+"alert.accessibilityRequired" = "需要辅助功能权限";
+"alert.accessibilityRequiredMessage" = "NotiShift 可以发送测试通知，但在当前应用版本被允许访问“系统设置 > 隐私与安全性 > 辅助功能”之前，无法移动 macOS 通知横幅。";
+"alert.launchAtLoginError" = "登录时启动错误";
+"alert.diagnosticsError" = "诊断错误";
+
+"button.openSettings" = "打开设置";
+"button.ok" = "好";
+
+"notification.testTitle" = "NotiShift 测试";
+"notification.testSubtitle" = "位置检查";
+"notification.testBody" = "这条通知应显示在所选位置。";
