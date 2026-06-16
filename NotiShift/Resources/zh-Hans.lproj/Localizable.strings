@@ -53,6 +53,16 @@
 "onboarding.body" = "NotiShift 在菜单栏中运行，并将 macOS 通知横幅移动到你选择的位置。";
 "onboarding.steps" = "1. 授予辅助功能权限。\n2. 在菜单栏图标中选择通知位置。\n3. 在“偏好设置 > 权限”中发送测试通知。";
 
+"status.enabled" = "启用：%@";
+"status.accessibility" = "辅助功能：%@";
+"status.position" = "位置：%@";
+"status.version" = "版本：%@";
+"status.on" = "开启";
+"status.off" = "关闭";
+"status.granted" = "已授权";
+"status.required" = "需要授权";
+"status.unknown" = "未知";
+
 "update.upToDateTitle" = "NotiShift 已是最新版本";
 "update.upToDateMessage" = "当前正在使用版本 %@。";
 "update.availableTitle" = "NotiShift %@ 可用";

@@ -53,6 +53,16 @@
 "onboarding.body" = "NotiShift runs from the menu bar and moves macOS notification banners to the position you choose.";
 "onboarding.steps" = "1. Grant Accessibility permission.\n2. Choose a notification position from the menu bar icon.\n3. Send a test notification from Preferences > Permissions.";
 
+"status.enabled" = "Enabled: %@";
+"status.accessibility" = "Accessibility: %@";
+"status.position" = "Position: %@";
+"status.version" = "Version: %@";
+"status.on" = "On";
+"status.off" = "Off";
+"status.granted" = "Granted";
+"status.required" = "Required";
+"status.unknown" = "Unknown";
+
 "update.upToDateTitle" = "NotiShift is up to date";
 "update.upToDateMessage" = "You are running version %@.";
 "update.availableTitle" = "NotiShift %@ is available";

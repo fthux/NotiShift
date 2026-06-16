@@ -19,6 +19,11 @@ final class PreferencesWindowController: NSWindowController {
   private let updateChecker: UpdateChecker
   private let logger = AppLogger.shared
 
+  private let statusSummaryStack = NSStackView()
+  private let enabledStatusLabel = NSTextField(labelWithString: "")
+  private let permissionStatusSummaryLabel = NSTextField(labelWithString: "")
+  private let positionStatusLabel = NSTextField(labelWithString: "")
+  private let versionStatusLabel = NSTextField(labelWithString: "")
   private let tabView = NSTabView()
   private let launchAtLoginButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
   private let languagePopup = NSPopUpButton()
@@ -41,7 +46,7 @@ final class PreferencesWindowController: NSWindowController {
     self.updateChecker = updateChecker
 
     let window = NSWindow(
-      contentRect: NSRect(x: 0, y: 0, width: 460, height: 300),
+      contentRect: NSRect(x: 0, y: 0, width: 500, height: 360),
       styleMask: [.titled, .closable, .miniaturizable],
       backing: .buffered,
       defer: false
@@ -70,16 +75,31 @@ final class PreferencesWindowController: NSWindowController {
     let contentView = NSView()
     contentView.translatesAutoresizingMaskIntoConstraints = false
 
+    statusSummaryStack.translatesAutoresizingMaskIntoConstraints = false
+    statusSummaryStack.orientation = .vertical
+    statusSummaryStack.alignment = .leading
+    statusSummaryStack.spacing = 4
+    statusSummaryStack.edgeInsets = NSEdgeInsets(top: 10, left: 12, bottom: 10, right: 12)
+    for label in [enabledStatusLabel, permissionStatusSummaryLabel, positionStatusLabel, versionStatusLabel] {
+      label.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
+      label.textColor = .secondaryLabelColor
+      statusSummaryStack.addArrangedSubview(label)
+    }
+
     tabView.translatesAutoresizingMaskIntoConstraints = false
     tabView.addTabViewItem(makeTab(identifier: "general", label: L10n.text("preferences.general"), view: makeGeneralView()))
     tabView.addTabViewItem(makeTab(identifier: "permissions", label: L10n.text("preferences.permissions"), view: makePermissionsView()))
     tabView.addTabViewItem(makeTab(identifier: "advanced", label: L10n.text("preferences.advanced"), view: makeAdvancedView()))
+    contentView.addSubview(statusSummaryStack)
     contentView.addSubview(tabView)
 
     NSLayoutConstraint.activate([
+      statusSummaryStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+      statusSummaryStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+      statusSummaryStack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
       tabView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
       tabView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-      tabView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+      tabView.topAnchor.constraint(equalTo: statusSummaryStack.bottomAnchor, constant: 12),
       tabView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
     ])
 
@@ -191,6 +211,7 @@ final class PreferencesWindowController: NSWindowController {
     automaticUpdatesButton.title = L10n.text("preferences.automaticallyCheckForUpdates")
     debugLoggingButton.title = L10n.text("preferences.debugLogging")
     rebuildLanguageMenu()
+    refreshStatusSummary()
 
     launchAtLoginButton.state = launchAtLoginManager.isEnabled ? .on : .off
     automaticUpdatesButton.state = preferences.automaticallyCheckForUpdates ? .on : .off
@@ -202,6 +223,25 @@ final class PreferencesWindowController: NSWindowController {
     if let index = AppLanguage.allCases.firstIndex(of: preferences.selectedLanguage) {
       languagePopup.selectItem(at: index)
     }
+  }
+
+  private func refreshStatusSummary() {
+    enabledStatusLabel.stringValue = String(
+      format: L10n.text("status.enabled"),
+      preferences.isEnabled ? L10n.text("status.on") : L10n.text("status.off")
+    )
+    permissionStatusSummaryLabel.stringValue = String(
+      format: L10n.text("status.accessibility"),
+      permissionManager.isTrusted ? L10n.text("status.granted") : L10n.text("status.required")
+    )
+    positionStatusLabel.stringValue = String(
+      format: L10n.text("status.position"),
+      preferences.selectedPosition.displayName
+    )
+    versionStatusLabel.stringValue = String(
+      format: L10n.text("status.version"),
+      Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? L10n.text("status.unknown")
+    )
   }
 
   private func rebuildLanguageMenu() {
