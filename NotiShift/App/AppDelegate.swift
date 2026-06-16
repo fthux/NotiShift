@@ -31,7 +31,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     menuBarController.install()
     preferencesWindowController.preferencesDelegate = self
     onboardingWindowController.onboardingDelegate = self
-    _ = permissionManager.requestIfNeeded(prompt: true)
 
     if permissionManager.isTrusted {
       startWatcherIfNeeded()
@@ -139,6 +138,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
 
   func onboardingDidRequestAccessibilitySettings() {
     permissionManager.openAccessibilitySettings()
+    startPermissionPolling()
   }
 
   func onboardingDidRequestPreferences() {
