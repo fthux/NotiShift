@@ -8,26 +8,32 @@ CONTENTS_DIR := $(APP_DIR)/Contents
 MACOS_DIR := $(CONTENTS_DIR)/MacOS
 RESOURCES_DIR := $(CONTENTS_DIR)/Resources
 SWIFT_SOURCES := $(shell find NotiShift -name '*.swift' | sort)
-SDK_TARGET := arm64-apple-macos11.0
+DEPLOYMENT_TARGET := 11.0
+ARCHS := arm64 x86_64
 
 .PHONY: all build package clean run verify
 
 all: build package
 
 build:
+	rm -rf $(APP_DIR)
 	mkdir -p $(BUILD_DIR) $(MODULE_CACHE_DIR) $(MACOS_DIR) $(RESOURCES_DIR)
 	cp NotiShift/Resources/Info.plist $(CONTENTS_DIR)/Info.plist
-	swiftc $(SWIFT_SOURCES) \
-		-o $(MACOS_DIR)/$(APP_NAME) \
-		-O \
-		-parse-as-library \
-		-target $(SDK_TARGET) \
-		-module-cache-path $(MODULE_CACHE_DIR) \
-		-Xcc -fmodules-cache-path=$(MODULE_CACHE_DIR) \
-		-framework AppKit \
-		-framework ApplicationServices \
-		-framework ServiceManagement \
-		-framework UserNotifications
+	$(foreach arch,$(ARCHS), \
+		mkdir -p $(BUILD_DIR)/$(arch) $(MODULE_CACHE_DIR)/$(arch); \
+		swiftc $(SWIFT_SOURCES) \
+			-o $(BUILD_DIR)/$(arch)/$(APP_NAME) \
+			-O \
+			-parse-as-library \
+			-target $(arch)-apple-macos$(DEPLOYMENT_TARGET) \
+			-module-cache-path $(MODULE_CACHE_DIR)/$(arch) \
+			-Xcc -fmodules-cache-path=$(MODULE_CACHE_DIR)/$(arch) \
+			-framework AppKit \
+			-framework ApplicationServices \
+			-framework ServiceManagement \
+			-framework UserNotifications; \
+	)
+	lipo -create $(foreach arch,$(ARCHS),$(BUILD_DIR)/$(arch)/$(APP_NAME)) -output $(MACOS_DIR)/$(APP_NAME)
 	codesign --force --deep --sign - --entitlements NotiShift/Resources/NotiShift.entitlements $(APP_DIR)
 
 package: build
@@ -35,6 +41,7 @@ package: build
 	shasum -a 256 $(DIST_DIR)/$(APP_NAME).app.tar.gz
 
 verify:
+	lipo -archs $(MACOS_DIR)/$(APP_NAME)
 	codesign -dv --verbose=4 $(APP_DIR)
 	spctl -a -vv $(APP_DIR) || true
 
