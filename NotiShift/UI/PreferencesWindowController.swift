@@ -25,6 +25,7 @@ final class PreferencesWindowController: NSWindowController {
   private let permissionStatusSummaryLabel = NSTextField(labelWithString: "")
   private let positionStatusLabel = NSTextField(labelWithString: "")
   private let pauseStatusSummaryLabel = NSTextField(labelWithString: "")
+  private let displayStatusLabel = NSTextField(labelWithString: "")
   private let versionStatusLabel = NSTextField(labelWithString: "")
   private let tabView = NSTabView()
   private let launchAtLoginButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
@@ -86,7 +87,7 @@ final class PreferencesWindowController: NSWindowController {
     statusSummaryStack.alignment = .leading
     statusSummaryStack.spacing = 4
     statusSummaryStack.edgeInsets = NSEdgeInsets(top: 10, left: 12, bottom: 10, right: 12)
-    for label in [enabledStatusLabel, permissionStatusSummaryLabel, positionStatusLabel, pauseStatusSummaryLabel, versionStatusLabel] {
+    for label in [enabledStatusLabel, permissionStatusSummaryLabel, positionStatusLabel, pauseStatusSummaryLabel, displayStatusLabel, versionStatusLabel] {
       label.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
       label.textColor = .secondaryLabelColor
       statusSummaryStack.addArrangedSubview(label)
@@ -313,6 +314,10 @@ final class PreferencesWindowController: NSWindowController {
       format: L10n.text("status.pause"),
       pauseStatusText()
     )
+    displayStatusLabel.stringValue = String(
+      format: L10n.text("status.displays"),
+      NSScreen.screens.count
+    )
     versionStatusLabel.stringValue = String(
       format: L10n.text("status.version"),
       Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? L10n.text("status.unknown")
@@ -452,6 +457,7 @@ final class PreferencesWindowController: NSWindowController {
     let automaticUpdates = preferences.automaticallyCheckForUpdates ? L10n.text("status.on") : L10n.text("status.off")
     let debugLogging = preferences.debugLoggingEnabled ? L10n.text("status.on") : L10n.text("status.off")
     let pause = pauseStatusText()
+    let displays = NSScreen.screens.count
     let lastTest = preferences.lastTestNotificationResult ?? L10n.text("preferences.lastTestResultNone")
 
     return """
@@ -463,6 +469,7 @@ final class PreferencesWindowController: NSWindowController {
     Accessibility: \(accessibility)
     Position: \(preferences.selectedPosition.displayName)
     Pause: \(pause)
+    Displays: \(displays)
     Automatically Check for Updates: \(automaticUpdates)
     Debug Logging: \(debugLogging)
     Last Test: \(lastTest)

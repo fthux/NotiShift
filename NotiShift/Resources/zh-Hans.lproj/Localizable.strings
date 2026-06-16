@@ -65,6 +65,7 @@
 "status.accessibility" = "辅助功能：%@";
 "status.position" = "位置：%@";
 "status.pause" = "暂停：%@";
+"status.displays" = "显示器：%d";
 "status.version" = "版本：%@";
 "status.on" = "开启";
 "status.off" = "关闭";

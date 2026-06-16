@@ -77,3 +77,10 @@ The app is designed with multiple detection strategies:
 - Polling fallback.
 - Exact banner subrole detection plus heuristic fallback.
 - Diagnostics export for version-specific compatibility fixes.
+
+## Multiple Displays
+
+NotiShift keeps notification banners on the display where macOS creates the
+notification window, then applies the selected position within that display's visible
+frame. The Preferences status summary and diagnostics summary include the number of
+detected displays to make multi-display reports easier to interpret.

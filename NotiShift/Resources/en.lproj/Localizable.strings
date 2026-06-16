@@ -65,6 +65,7 @@
 "status.accessibility" = "Accessibility: %@";
 "status.position" = "Position: %@";
 "status.pause" = "Pause: %@";
+"status.displays" = "Displays: %d";
 "status.version" = "Version: %@";
 "status.on" = "On";
 "status.off" = "Off";
