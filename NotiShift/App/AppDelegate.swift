@@ -26,6 +26,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
   func applicationDidFinishLaunching(_ notification: Notification) {
     AppLogger.shared.info("NotiShift launch started profile=\(profile.generation.rawValue)")
     NSApp.setActivationPolicy(.accessory)
+    applySelectedTheme()
     UNUserNotificationCenter.current().delegate = self
     menuBarController.delegate = self
     menuBarController.install()
@@ -152,6 +153,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     menuBarController.rebuildMenu()
   }
 
+  func preferencesDidChangeTheme() {
+    applySelectedTheme()
+  }
+
   func onboardingDidRequestAccessibilitySettings() {
     permissionManager.openAccessibilitySettings()
     startPermissionPolling()
@@ -171,6 +176,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     permissionTimer?.invalidate()
     permissionTimer = nil
     watcher.start()
+  }
+
+  private func applySelectedTheme() {
+    NSApp.appearance = preferences.selectedTheme.appearance
   }
 
   private func startPermissionPolling() {
@@ -308,5 +317,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
   ) {
     AppLogger.shared.info("Received notification response id=\(response.notification.request.identifier)")
     completionHandler()
+  }
+}
+
+private extension AppTheme {
+  var appearance: NSAppearance? {
+    switch self {
+    case .system:
+      nil
+    case .light:
+      NSAppearance(named: .aqua)
+    case .dark:
+      NSAppearance(named: .darkAqua)
+    }
   }
 }

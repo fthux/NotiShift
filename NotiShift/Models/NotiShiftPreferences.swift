@@ -5,6 +5,7 @@ enum PreferencesKey {
   static let isEnabled = "isEnabled"
   static let debugLoggingEnabled = "debugLoggingEnabled"
   static let selectedLanguage = "selectedLanguage"
+  static let selectedTheme = "selectedTheme"
   static let automaticallyCheckForUpdates = "automaticallyCheckForUpdates"
   static let lastUpdateCheckAt = "lastUpdateCheckAt"
   static let hasCompletedOnboarding = "hasCompletedOnboarding"
@@ -22,6 +23,20 @@ enum AppLanguage: String, CaseIterable {
     case .system: L10n.text("language.system")
     case .english: "English"
     case .simplifiedChinese: "简体中文"
+    }
+  }
+}
+
+enum AppTheme: String, CaseIterable {
+  case system
+  case light
+  case dark
+
+  var displayName: String {
+    switch self {
+    case .system: L10n.text("theme.system")
+    case .light: L10n.text("theme.light")
+    case .dark: L10n.text("theme.dark")
     }
   }
 }
@@ -63,6 +78,16 @@ final class NotiShiftPreferences {
     }
     set {
       defaults.set(newValue.rawValue, forKey: PreferencesKey.selectedLanguage)
+    }
+  }
+
+  var selectedTheme: AppTheme {
+    get {
+      defaults.string(forKey: PreferencesKey.selectedTheme)
+        .flatMap(AppTheme.init(rawValue:)) ?? .system
+    }
+    set {
+      defaults.set(newValue.rawValue, forKey: PreferencesKey.selectedTheme)
     }
   }
 

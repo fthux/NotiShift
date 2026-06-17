@@ -20,6 +20,7 @@
 "preferences.advanced" = "Advanced";
 "preferences.launchAtLogin" = "Launch at Login";
 "preferences.language" = "Language";
+"preferences.theme" = "Theme";
 "preferences.positionPicker" = "Notification Position";
 "preferences.automaticallyCheckForUpdates" = "Automatically Check for Updates";
 "preferences.checkForUpdatesNow" = "Check for Updates Now";
@@ -62,6 +63,10 @@
 "preferences.actionDiagnosticsExported" = "Diagnostics exported and revealed in Finder.";
 "preferences.actionDiagnosticsExportFailed" = "Diagnostics export failed: %@";
 "language.system" = "System";
+
+"theme.system" = "System";
+"theme.light" = "Light";
+"theme.dark" = "Dark";
 
 "alert.accessibilityRequired" = "Accessibility Permission Required";
 "alert.accessibilityRequiredMessage" = "Noti Shift can send test notifications, but it cannot move macOS notification banners until the current app build is allowed in System Settings > Privacy & Security > Accessibility.";

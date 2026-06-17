@@ -9,6 +9,7 @@ protocol PreferencesWindowControllerDelegate: AnyObject {
   func preferencesDidRequestTestNotification(completion: @escaping (TestNotificationResult) -> Void)
   func preferencesDidRequestRestartWatcher() -> Bool
   func preferencesDidChangeLanguage()
+  func preferencesDidChangeTheme()
 }
 
 final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, NSWindowDelegate {
@@ -30,6 +31,7 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
   private let tabView = NSTabView()
   private let launchAtLoginButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
   private let languagePopup = NSPopUpButton()
+  private let themePopup = NSPopUpButton()
   private let automaticUpdatesButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
   private let positionPickerLabel = NSTextField(labelWithString: "")
   private var positionButtons: [NotificationPosition: NSButton] = [:]
@@ -39,6 +41,7 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
   private let permissionsActionStatusLabel = NSTextField(wrappingLabelWithString: "")
   private let advancedActionStatusLabel = NSTextField(wrappingLabelWithString: "")
   private let languageLabel = NSTextField(labelWithString: "")
+  private let themeLabel = NSTextField(labelWithString: "")
   private let debugLoggingButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
   private var localizedButtons: [(button: NSButton, titleKey: String)] = []
   private var localizedLabels: [(label: NSTextField, textKey: String)] = []
@@ -149,6 +152,17 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     languageRow.addArrangedSubview(languageLabel)
     languageRow.addArrangedSubview(languagePopup)
 
+    let themeRow = NSStackView()
+    themeRow.orientation = .horizontal
+    themeRow.alignment = .centerY
+    themeRow.spacing = 12
+
+    themePopup.target = self
+    themePopup.action = #selector(selectTheme)
+    rebuildThemeMenu()
+    themeRow.addArrangedSubview(themeLabel)
+    themeRow.addArrangedSubview(themePopup)
+
     automaticUpdatesButton.target = self
     automaticUpdatesButton.action = #selector(toggleAutomaticallyCheckForUpdates)
     let checkUpdatesButton = makeLocalizedButton(titleKey: "preferences.checkForUpdatesNow", action: #selector(checkForUpdatesNow))
@@ -161,6 +175,7 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     stack.addArrangedSubview(makeSeparator())
     stack.addArrangedSubview(makeGroup([
       languageRow,
+      themeRow,
     ]))
     stack.addArrangedSubview(makeSeparator())
     stack.addArrangedSubview(makeGroup([
@@ -425,12 +440,14 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     tabView.tabViewItem(at: 2).image?.accessibilityDescription = L10n.text("preferences.advanced")
     launchAtLoginButton.title = L10n.text("preferences.launchAtLogin")
     languageLabel.stringValue = L10n.text("preferences.language")
+    themeLabel.stringValue = L10n.text("preferences.theme")
     positionPickerLabel.stringValue = L10n.text("preferences.positionPicker")
     automaticUpdatesButton.title = L10n.text("preferences.automaticallyCheckForUpdates")
     debugLoggingButton.title = L10n.text("preferences.debugLogging")
     refreshRegisteredLocalizedViews()
     refreshNotificationStatusLabel()
     rebuildLanguageMenu()
+    rebuildThemeMenu()
 
     launchAtLoginButton.state = launchAtLoginManager.isEnabled ? .on : .off
     automaticUpdatesButton.state = preferences.automaticallyCheckForUpdates ? .on : .off
@@ -442,6 +459,9 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
 
     if let index = AppLanguage.allCases.firstIndex(of: preferences.selectedLanguage) {
       languagePopup.selectItem(at: index)
+    }
+    if let index = AppTheme.allCases.firstIndex(of: preferences.selectedTheme) {
+      themePopup.selectItem(at: index)
     }
     refreshPositionPicker()
     resizeWindowForSelectedTab(animated: true)
@@ -545,6 +565,14 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     }
   }
 
+  private func rebuildThemeMenu() {
+    themePopup.removeAllItems()
+    for theme in AppTheme.allCases {
+      themePopup.addItem(withTitle: theme.displayName)
+      themePopup.lastItem?.representedObject = theme.rawValue
+    }
+  }
+
   @objc private func toggleLaunchAtLogin() {
     do {
       try launchAtLoginManager.setEnabled(launchAtLoginButton.state == .on)
@@ -563,6 +591,18 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     }
     preferences.selectedLanguage = language
     preferencesDelegate?.preferencesDidChangeLanguage()
+    refresh()
+  }
+
+  @objc private func selectTheme() {
+    guard
+      let rawValue = themePopup.selectedItem?.representedObject as? String,
+      let theme = AppTheme(rawValue: rawValue)
+    else {
+      return
+    }
+    preferences.selectedTheme = theme
+    preferencesDelegate?.preferencesDidChangeTheme()
     refresh()
   }
 

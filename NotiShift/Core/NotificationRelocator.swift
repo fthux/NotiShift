@@ -10,6 +10,7 @@ final class NotificationRelocator {
 
   private var originalWindowOrigin: CGPoint?
   private var windowIsShifted = false
+  private var provisionalMoveGraceUntil: Date?
 
   init(detector: NotificationBannerDetector, preferences: NotiShiftPreferences) {
     self.detector = detector
@@ -37,6 +38,7 @@ final class NotificationRelocator {
   func resetBaseline() {
     originalWindowOrigin = nil
     windowIsShifted = false
+    provisionalMoveGraceUntil = nil
   }
 
   func restore(windows: [AXUIElement], reason: String) {
@@ -50,9 +52,16 @@ final class NotificationRelocator {
     }
 
     guard let snapshot = detector.detectionSnapshot(in: window) else {
+      if let windowFrame = window.nsFrame(),
+        moveProvisionallyIfNeeded(window, windowFrame: windowFrame)
+      {
+        return true
+      }
       logger.debug("Skipping window without detected banner: \(window.nsSummary())")
       return false
     }
+
+    provisionalMoveGraceUntil = nil
 
     guard snapshot.window.nsIsSettable(kAXPositionAttribute) else {
       logger.debug("Window position not settable: \(snapshot.window.nsSummary())")
@@ -100,6 +109,74 @@ final class NotificationRelocator {
     if result == .success {
       resetBaseline()
     }
+  }
+
+  private func moveProvisionallyIfNeeded(_ window: AXUIElement, windowFrame: CGRect) -> Bool {
+    if let provisionalMoveGraceUntil, provisionalMoveGraceUntil > Date(), windowIsShifted {
+      return true
+    }
+
+    guard shouldProvisionallyMove(window, windowFrame: windowFrame) else { return false }
+    let estimatedBannerFrame = estimatedBannerFrame(for: windowFrame)
+    guard let target = targetOrigin(for: windowFrame, bannerFrame: estimatedBannerFrame) else {
+      logger.debug("No containing screen for provisional notification window")
+      return false
+    }
+
+    if originalWindowOrigin == nil {
+      originalWindowOrigin = windowFrame.origin
+      logger.debug("Captured provisional origin window=\(NSStringFromRect(windowFrame))")
+    }
+
+    let result = window.nsSetPosition(target)
+    windowIsShifted = result == .success
+    if result == .success {
+      provisionalMoveGraceUntil = Date().addingTimeInterval(0.45)
+    }
+    logger.debug(
+      "Provisional window position result=\(result.nsName) target=\(NSStringFromPoint(target)) window=\(NSStringFromRect(windowFrame)) estimatedBanner=\(NSStringFromRect(estimatedBannerFrame))"
+    )
+    return result == .success
+  }
+
+  private func shouldProvisionallyMove(_ window: AXUIElement, windowFrame: CGRect) -> Bool {
+    guard shouldUseProvisionalMove else { return false }
+    guard window.nsIsSettable(kAXPositionAttribute) else { return false }
+    guard let screen = mapper.containingScreen(forAXFrame: windowFrame) else { return false }
+
+    let role = window.nsAttribute(kAXRoleAttribute, as: String.self) ?? ""
+    guard role == kAXWindowRole as String || role == "AXWindow" else { return false }
+
+    guard windowFrame.width >= 180 &&
+      windowFrame.width <= 760 &&
+      windowFrame.height >= 45 &&
+      windowFrame.height <= 380
+    else { return false }
+
+    if originalWindowOrigin == nil {
+      let rightInset = abs(screen.visibleFrame.maxX - windowFrame.maxX)
+      let isNearRightEdge = rightInset <= 120
+      let isNearTopEdge = windowFrame.minY <= 220
+      return isNearRightEdge && isNearTopEdge
+    }
+
+    return true
+  }
+
+  private var shouldUseProvisionalMove: Bool {
+    switch preferences.selectedPosition {
+    case .topLeft, .topCenter, .topRight:
+      false
+    case .middleLeft, .center, .middleRight, .bottomLeft, .bottomCenter, .bottomRight:
+      true
+    }
+  }
+
+  private func estimatedBannerFrame(for windowFrame: CGRect) -> CGRect {
+    let width = stablePlacementWidth(for: windowFrame.width)
+    let height = min(max(windowFrame.height, 70), 180)
+    let x = windowFrame.minX + stableLocalBannerX(windowWidth: windowFrame.width, bannerWidth: width)
+    return CGRect(x: x, y: windowFrame.minY, width: width, height: height)
   }
 
   private func targetOrigin(for windowFrame: CGRect, bannerFrame: CGRect) -> CGPoint? {
