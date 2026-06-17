@@ -8,17 +8,12 @@ protocol PreferencesWindowControllerDelegate: AnyObject {
   func preferencesDidRequestNotificationSettings() -> Bool
   func preferencesDidRequestTestNotification(completion: @escaping (TestNotificationResult) -> Void)
   func preferencesDidRequestRestartWatcher() -> Bool
+  func preferencesDidRequestFeedbackNotification(title: String, body: String)
   func preferencesDidChangeLanguage()
   func preferencesDidChangeTheme()
 }
 
 final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, NSWindowDelegate {
-  private struct ActionStatus {
-    let key: String
-    let argument: String?
-    let isError: Bool
-  }
-
   weak var preferencesDelegate: PreferencesWindowControllerDelegate?
 
   private let preferences: NotiShiftPreferences
@@ -37,9 +32,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
   private var positionButtons: [NotificationPosition: NSButton] = [:]
   private let accessibilityStatusLabel = NSTextField(labelWithString: "")
   private let notificationStatusLabel = NSTextField(labelWithString: "")
-  private let testNotificationResultLabel = NSTextField(wrappingLabelWithString: "")
-  private let permissionsActionStatusLabel = NSTextField(wrappingLabelWithString: "")
-  private let advancedActionStatusLabel = NSTextField(wrappingLabelWithString: "")
   private let languageLabel = NSTextField(labelWithString: "")
   private let themeLabel = NSTextField(labelWithString: "")
   private let debugLoggingButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
@@ -47,8 +39,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
   private var localizedLabels: [(label: NSTextField, textKey: String)] = []
   private var notificationPermissionStatus: NotificationPermissionStatus?
   private var notificationPermissionRequestID = 0
-  private var actionStatuses: [ObjectIdentifier: ActionStatus] = [:]
-  private var actionStatusHideWorkItems: [ObjectIdentifier: DispatchWorkItem] = [:]
   private var permissionRefreshTimer: Timer?
 
   init(
@@ -192,11 +182,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
 
     accessibilityStatusLabel.font = NSFont.systemFont(ofSize: NSFont.systemFontSize, weight: .medium)
     notificationStatusLabel.font = NSFont.systemFont(ofSize: NSFont.systemFontSize, weight: .medium)
-    testNotificationResultLabel.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
-    testNotificationResultLabel.textColor = .secondaryLabelColor
-    testNotificationResultLabel.maximumNumberOfLines = 0
-    testNotificationResultLabel.preferredMaxLayoutWidth = 420
-    configureStatusLabel(permissionsActionStatusLabel)
 
     stack.addArrangedSubview(makeGroup([
       accessibilityStatusLabel,
@@ -208,8 +193,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
       notificationStatusLabel,
       makeActionRow(titleKey: "preferences.openNotificationSettings", symbolName: "bell.badge", action: #selector(openNotificationSettings)),
       makeActionRow(titleKey: "preferences.sendTestNotification", symbolName: "paperplane", action: #selector(sendTestNotification), showsChevron: false),
-      testNotificationResultLabel,
-      permissionsActionStatusLabel,
     ]))
     pin(stack, to: view)
     return view
@@ -221,7 +204,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
 
     debugLoggingButton.target = self
     debugLoggingButton.action = #selector(toggleDebugLogging)
-    configureStatusLabel(advancedActionStatusLabel)
     stack.addArrangedSubview(makeGroup([
       debugLoggingButton,
       makeActionRow(titleKey: "preferences.restartWatcher", symbolName: "arrow.triangle.2.circlepath", action: #selector(restartWatcher), showsChevron: false),
@@ -231,7 +213,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
       makeActionRow(titleKey: "preferences.openLogFile", symbolName: "doc.text.magnifyingglass", action: #selector(openLogFile)),
       makeActionRow(titleKey: "preferences.copyDiagnosticsSummary", symbolName: "doc.on.doc", action: #selector(copyDiagnosticsSummary), showsChevron: false),
       makeActionRow(titleKey: "preferences.exportDiagnostics", symbolName: "square.and.arrow.up", action: #selector(exportDiagnostics), showsChevron: false),
-      advancedActionStatusLabel,
     ]))
     pin(stack, to: view)
     return view
@@ -353,54 +334,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     ])
   }
 
-  private func configureStatusLabel(_ label: NSTextField) {
-    label.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
-    label.textColor = .secondaryLabelColor
-    label.maximumNumberOfLines = 0
-    label.preferredMaxLayoutWidth = 420
-    label.stringValue = ""
-    label.isHidden = true
-  }
-
-  private func setActionStatusText(_ text: String, label: NSTextField, isError: Bool) {
-    label.stringValue = text
-    label.isHidden = text.isEmpty
-    label.textColor = isError ? .systemRed : .secondaryLabelColor
-  }
-
-  private func setActionStatus(_ key: String, argument: String? = nil, label: NSTextField, isError: Bool = false) {
-    let text: String
-    if let argument {
-      text = String(format: L10n.text(key), argument)
-    } else {
-      text = L10n.text(key)
-    }
-
-    actionStatuses[ObjectIdentifier(label)] = ActionStatus(key: key, argument: argument, isError: isError)
-    setActionStatusText(text, label: label, isError: isError)
-    resizeWindowForSelectedTab(animated: true)
-    scheduleActionStatusHide(label)
-  }
-
-  private func scheduleActionStatusHide(_ label: NSTextField) {
-    let identifier = ObjectIdentifier(label)
-    actionStatusHideWorkItems[identifier]?.cancel()
-
-    let workItem = DispatchWorkItem { [weak self, weak label] in
-      guard let self, let label else { return }
-      self.setActionStatusText("", label: label, isError: false)
-      let identifier = ObjectIdentifier(label)
-      self.actionStatuses[identifier] = nil
-      self.actionStatusHideWorkItems[identifier] = nil
-      if label === self.permissionsActionStatusLabel || label === self.advancedActionStatusLabel {
-        self.resizeWindowForSelectedTab(animated: true)
-      }
-    }
-
-    actionStatusHideWorkItems[identifier] = workItem
-    DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: workItem)
-  }
-
   private func resizeWindowForSelectedTab(animated: Bool) {
     guard
       let window,
@@ -453,9 +386,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     automaticUpdatesButton.state = preferences.automaticallyCheckForUpdates ? .on : .off
     debugLoggingButton.state = preferences.debugLoggingEnabled ? .on : .off
     refreshPermissionStatuses()
-    testNotificationResultLabel.stringValue = preferences.lastTestNotificationResult.map {
-      String(format: L10n.text("preferences.lastTestResult"), $0)
-    } ?? L10n.text("preferences.lastTestResultNone")
 
     if let index = AppLanguage.allCases.firstIndex(of: preferences.selectedLanguage) {
       languagePopup.selectItem(at: index)
@@ -473,28 +403,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     }
     for item in localizedLabels {
       item.label.stringValue = L10n.text(item.textKey)
-    }
-    refreshVisibleActionStatuses()
-  }
-
-  private func refreshVisibleActionStatuses() {
-    for (identifier, status) in actionStatuses {
-      let label: NSTextField
-      if identifier == ObjectIdentifier(permissionsActionStatusLabel) {
-        label = permissionsActionStatusLabel
-      } else if identifier == ObjectIdentifier(advancedActionStatusLabel) {
-        label = advancedActionStatusLabel
-      } else {
-        continue
-      }
-
-      let text: String
-      if let argument = status.argument {
-        text = String(format: L10n.text(status.key), argument)
-      } else {
-        text = L10n.text(status.key)
-      }
-      setActionStatusText(text, label: label, isError: status.isError)
     }
   }
 
@@ -648,102 +556,53 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
   }
 
   @objc private func openAccessibilitySettings() {
-    let didOpen = permissionManager.openAccessibilitySettings()
-    setActionStatus(
-      didOpen ? "preferences.actionOpenedAccessibilitySettings" : "preferences.actionOpenAccessibilitySettingsFailed",
-      label: permissionsActionStatusLabel,
-      isError: !didOpen
-    )
+    _ = permissionManager.openAccessibilitySettings()
   }
 
   @objc private func openNotificationSettings() {
-    let didOpen = preferencesDelegate?.preferencesDidRequestNotificationSettings() ?? false
+    _ = preferencesDelegate?.preferencesDidRequestNotificationSettings()
     requestNotificationPermissionStatus()
-    setActionStatus(
-      didOpen ? "preferences.actionOpenedNotificationSettings" : "preferences.actionOpenNotificationSettingsFailed",
-      label: permissionsActionStatusLabel,
-      isError: !didOpen
-    )
   }
 
   @objc private func retryPermissionCheck() {
     let isTrusted = preferencesDelegate?.preferencesDidRequestPermissionCheck() ?? permissionManager.isTrusted
     refresh()
-    setActionStatus(
-      isTrusted ? "preferences.actionPermissionGranted" : "preferences.actionPermissionStillRequired",
-      label: permissionsActionStatusLabel,
-      isError: !isTrusted
+    sendFeedbackNotification(
+      bodyKey: isTrusted ? "preferences.actionPermissionGranted" : "preferences.actionPermissionStillRequired"
     )
   }
 
   @objc private func sendTestNotification() {
-    setActionStatus("preferences.actionSendingTestNotification", label: permissionsActionStatusLabel)
     preferencesDelegate?.preferencesDidRequestTestNotification { [weak self] result in
       DispatchQueue.main.async {
         guard let self else { return }
         self.refresh()
         self.requestNotificationPermissionStatus()
-        switch result {
-        case .scheduled, .delivered:
-          self.setActionStatus("preferences.actionTestNotificationSent", label: self.permissionsActionStatusLabel)
-        case let .notDelivered(reason):
-          self.setActionStatus(
-            "preferences.actionTestNotificationNotDelivered",
-            argument: reason,
-            label: self.permissionsActionStatusLabel,
-            isError: true
-          )
-        case .authorizationDenied:
-          self.setActionStatus(
-            "preferences.actionTestNotificationDenied",
-            label: self.permissionsActionStatusLabel,
-            isError: true
-          )
-        case let .failed(message):
-          self.setActionStatus(
-            "preferences.actionTestNotificationFailed",
-            argument: message,
-            label: self.permissionsActionStatusLabel,
-            isError: true
-          )
-        }
       }
     }
   }
 
   @objc private func toggleDebugLogging() {
     preferences.debugLoggingEnabled = debugLoggingButton.state == .on
-    setActionStatus(
-      preferences.debugLoggingEnabled ? "preferences.actionDebugLoggingEnabled" : "preferences.actionDebugLoggingDisabled",
-      label: advancedActionStatusLabel
-    )
   }
 
   @objc private func restartWatcher() {
     let didRestart = preferencesDelegate?.preferencesDidRequestRestartWatcher() ?? false
-    setActionStatus(
-      didRestart ? "preferences.actionWatcherRestarted" : "preferences.actionWatcherRestartNeedsPermission",
-      label: advancedActionStatusLabel,
-      isError: !didRestart
-    )
+    let bodyKey = didRestart
+      ? "preferences.actionWatcherRestarted"
+      : "preferences.actionWatcherRestartNeedsPermission"
+    sendFeedbackNotification(bodyKey: bodyKey)
   }
 
   @objc private func openLogFile() {
-    let didOpen = NSWorkspace.shared.open(logger.logFileURL)
-    setActionStatus(
-      didOpen ? "preferences.actionOpenedLogFile" : "preferences.actionOpenLogFileFailed",
-      label: advancedActionStatusLabel,
-      isError: !didOpen
-    )
+    _ = NSWorkspace.shared.open(logger.logFileURL)
   }
 
   @objc private func copyDiagnosticsSummary() {
     NSPasteboard.general.clearContents()
     let didCopy = NSPasteboard.general.setString(diagnosticsSummary(), forType: .string)
-    setActionStatus(
-      didCopy ? "preferences.actionDiagnosticsCopied" : "preferences.actionDiagnosticsCopyFailed",
-      label: advancedActionStatusLabel,
-      isError: !didCopy
+    sendFeedbackNotification(
+      bodyKey: didCopy ? "preferences.actionDiagnosticsCopied" : "preferences.actionDiagnosticsCopyFailed"
     )
   }
 
@@ -751,14 +610,7 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     do {
       let url = try diagnosticsExporter.export()
       NSWorkspace.shared.activateFileViewerSelecting([url])
-      setActionStatus("preferences.actionDiagnosticsExported", label: advancedActionStatusLabel)
     } catch {
-      setActionStatus(
-        "preferences.actionDiagnosticsExportFailed",
-        argument: error.localizedDescription,
-        label: advancedActionStatusLabel,
-        isError: true
-      )
       showAlert(title: L10n.text("alert.diagnosticsError"), message: error.localizedDescription)
     }
   }
@@ -772,7 +624,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     let automaticUpdates = preferences.automaticallyCheckForUpdates ? L10n.text("status.on") : L10n.text("status.off")
     let debugLogging = preferences.debugLoggingEnabled ? L10n.text("status.on") : L10n.text("status.off")
     let displays = NSScreen.screens.count
-    let lastTest = preferences.lastTestNotificationResult ?? L10n.text("preferences.lastTestResultNone")
 
     return """
     Noti Shift Diagnostics Summary
@@ -785,7 +636,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     Displays: \(displays)
     Automatically Check for Updates: \(automaticUpdates)
     Debug Logging: \(debugLogging)
-    Last Test: \(lastTest)
     """
   }
 
@@ -795,6 +645,13 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     alert.informativeText = message
     alert.addButton(withTitle: L10n.text("button.ok"))
     alert.runModal()
+  }
+
+  private func sendFeedbackNotification(bodyKey: String) {
+    preferencesDelegate?.preferencesDidRequestFeedbackNotification(
+      title: L10n.text("preferences.title"),
+      body: L10n.text(bodyKey)
+    )
   }
 
   private func showUpdateAvailableAlert(currentVersion: String, release: ReleaseInfo) {

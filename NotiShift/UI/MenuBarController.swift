@@ -28,31 +28,7 @@ final class MenuBarController {
   }
 
   private func menuBarImage() -> NSImage {
-    let image = NSImage(size: NSSize(width: 18, height: 18))
-    image.lockFocus()
-    NSColor.black.setFill()
-
-    let upperBlock = NSBezierPath(
-      roundedRect: NSRect(x: 1.8, y: 7.7, width: 8.6, height: 8.2),
-      xRadius: 2.3,
-      yRadius: 2.3
-    )
-    upperBlock.fill()
-
-    let lowerBlock = NSBezierPath(
-      roundedRect: NSRect(x: 7.6, y: 2.1, width: 8.6, height: 8.1),
-      xRadius: 2.3,
-      yRadius: 2.3
-    )
-    lowerBlock.fill()
-
-    NSGraphicsContext.current?.compositingOperation = .clear
-    NSBezierPath(ovalIn: NSRect(x: 7.9, y: 7.0, width: 3.7, height: 3.7)).fill()
-    NSGraphicsContext.current?.compositingOperation = .sourceOver
-
-    NSColor.black.setFill()
-    NSBezierPath(ovalIn: NSRect(x: 12.6, y: 11.7, width: 3.2, height: 3.2)).fill()
-    image.unlockFocus()
+    let image = NSImage(named: "NotiShiftMenuBarIcon") ?? NSImage(systemSymbolName: "square.on.square", accessibilityDescription: nil) ?? NSImage()
     image.isTemplate = true
     return image
   }

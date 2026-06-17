@@ -11,9 +11,14 @@ enum NotificationPermissionStatus {
 enum TestNotificationResult {
   case scheduled
   case delivered
-  case notDelivered(String)
+  case notDelivered(TestNotificationDeliveryIssue)
   case authorizationDenied
   case failed(String)
+}
+
+enum TestNotificationDeliveryIssue {
+  case pending
+  case suppressed
 }
 
 final class TestNotificationSender {
@@ -140,10 +145,7 @@ final class TestNotificationSender {
         center.getPendingNotificationRequests { requests in
           let isPending = requests.contains { $0.identifier == requestIdentifier }
           self?.logger.info("Pending modern notification id=\(requestIdentifier) present=\(isPending)")
-          let reason = isPending
-            ? L10n.text("testResult.notDeliveredPending")
-            : L10n.text("testResult.notDeliveredSuppressed")
-          completion(.notDelivered(reason))
+          completion(.notDelivered(isPending ? .pending : .suppressed))
         }
       }
     }

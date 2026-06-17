@@ -21,6 +21,7 @@ build:
 	mkdir -p "$(BUILD_DIR)" "$(MODULE_CACHE_DIR)" "$(MACOS_DIR)" "$(RESOURCES_DIR)"
 	cp NotiShift/Resources/Info.plist "$(CONTENTS_DIR)/Info.plist"
 	cp NotiShift/Resources/NotiShift.icns "$(RESOURCES_DIR)/"
+	cp NotiShift/Resources/NotiShiftMenuBarIcon*.png "$(RESOURCES_DIR)/"
 	cp -R NotiShift/Resources/*.lproj "$(RESOURCES_DIR)/"
 	$(foreach arch,$(ARCHS), \
 		mkdir -p "$(BUILD_DIR)/$(arch)" "$(MODULE_CACHE_DIR)/$(arch)"; \

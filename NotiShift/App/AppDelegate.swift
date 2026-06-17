@@ -84,9 +84,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     if hideApp {
       NSApp.hide(nil)
     }
-    testNotificationSender.send { [weak self] result in
+    testNotificationSender.send { result in
       DispatchQueue.main.async {
-        self?.recordTestNotificationResult(result, canRelocate: canRelocate)
         completion?(result)
       }
     }
@@ -147,6 +146,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
 
   func preferencesDidRequestRestartWatcher() -> Bool {
     menuBarControllerDidRequestRestartWatcher()
+  }
+
+  func preferencesDidRequestFeedbackNotification(title: String, body: String) {
+    sendFeedbackNotification(title: title, body: body)
   }
 
   func preferencesDidChangeLanguage() {
@@ -237,29 +240,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     }
   }
 
-  private func recordTestNotificationResult(_ result: TestNotificationResult, canRelocate: Bool) {
-    let relocationStatus = canRelocate
-      ? L10n.text("testResult.relocationReady")
-      : L10n.text("testResult.relocationPermissionRequired")
+  private func sendFeedbackNotification(title: String, body: String) {
+    let center = UNUserNotificationCenter.current()
+    center.requestAuthorization(options: [.alert, .sound]) { granted, error in
+      if let error {
+        AppLogger.shared.error("Feedback notification authorization failed: \(error.localizedDescription)")
+        return
+      }
+      guard granted else {
+        AppLogger.shared.info("Feedback notification authorization denied")
+        return
+      }
 
-    switch result {
-    case .scheduled, .delivered:
-      preferences.lastTestNotificationResult = String(
-        format: L10n.text("testResult.scheduled"),
-        relocationStatus
+      let content = UNMutableNotificationContent()
+      content.title = title
+      content.body = body
+      content.sound = .default
+
+      let request = UNNotificationRequest(
+        identifier: "notishift-feedback-\(UUID().uuidString)",
+        content: content,
+        trigger: nil
       )
-    case let .notDelivered(reason):
-      preferences.lastTestNotificationResult = String(
-        format: L10n.text("testResult.notDelivered"),
-        reason
-      )
-    case .authorizationDenied:
-      preferences.lastTestNotificationResult = L10n.text("testResult.authorizationDenied")
-    case let .failed(message):
-      preferences.lastTestNotificationResult = String(
-        format: L10n.text("testResult.failed"),
-        message
-      )
+      center.add(request) { error in
+        if let error {
+          AppLogger.shared.error("Failed to deliver feedback notification: \(error.localizedDescription)")
+        }
+      }
     }
   }
 

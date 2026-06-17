@@ -34,8 +34,6 @@
 "preferences.openNotificationSettings" = "打开通知设置";
 "preferences.retryPermissionCheck" = "重新检查权限";
 "preferences.sendTestNotification" = "发送测试通知";
-"preferences.lastTestResult" = "上次测试：%@";
-"preferences.lastTestResultNone" = "上次测试：尚未运行";
 "preferences.debugLogging" = "调试日志";
 "preferences.restartWatcher" = "重启监听器";
 "preferences.openLogFile" = "打开日志文件";
@@ -94,15 +92,6 @@
 "status.granted" = "已授权";
 "status.required" = "需要授权";
 "status.unknown" = "未知";
-
-"testResult.scheduled" = "通知已加入系统队列。重定位：%@。";
-"testResult.notDelivered" = "通知未投递：%@";
-"testResult.notDeliveredPending" = "请求仍在等待处理。";
-"testResult.notDeliveredSuppressed" = "macOS 可能因为专注模式、通知样式或系统通知策略抑制了横幅显示。";
-"testResult.authorizationDenied" = "通知权限被拒绝。";
-"testResult.failed" = "通知失败：%@";
-"testResult.relocationReady" = "已就绪";
-"testResult.relocationPermissionRequired" = "需要权限";
 
 "diagnosticsSummary.copiedTitle" = "已复制诊断摘要";
 "diagnosticsSummary.copiedMessage" = "诊断摘要已复制到剪贴板。";

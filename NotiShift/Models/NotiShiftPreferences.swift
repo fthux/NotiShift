@@ -10,7 +10,6 @@ enum PreferencesKey {
   static let lastUpdateCheckAt = "lastUpdateCheckAt"
   static let hasCompletedOnboarding = "hasCompletedOnboarding"
   static let lastOnboardingPromptVersion = "lastOnboardingPromptVersion"
-  static let lastTestNotificationResult = "lastTestNotificationResult"
 }
 
 enum AppLanguage: String, CaseIterable {
@@ -114,10 +113,5 @@ final class NotiShiftPreferences {
   var lastOnboardingPromptVersion: String? {
     get { defaults.string(forKey: PreferencesKey.lastOnboardingPromptVersion) }
     set { defaults.set(newValue, forKey: PreferencesKey.lastOnboardingPromptVersion) }
-  }
-
-  var lastTestNotificationResult: String? {
-    get { defaults.string(forKey: PreferencesKey.lastTestNotificationResult) }
-    set { defaults.set(newValue, forKey: PreferencesKey.lastTestNotificationResult) }
   }
 }

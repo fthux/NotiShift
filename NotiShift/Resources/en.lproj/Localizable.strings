@@ -34,8 +34,6 @@
 "preferences.openNotificationSettings" = "Open Notification Settings";
 "preferences.retryPermissionCheck" = "Retry Permission Check";
 "preferences.sendTestNotification" = "Send Test Notification";
-"preferences.lastTestResult" = "Last test: %@";
-"preferences.lastTestResultNone" = "Last test: Not run yet";
 "preferences.debugLogging" = "Debug Logging";
 "preferences.restartWatcher" = "Restart Watcher";
 "preferences.openLogFile" = "Open Log File";
@@ -94,15 +92,6 @@
 "status.granted" = "Granted";
 "status.required" = "Required";
 "status.unknown" = "Unknown";
-
-"testResult.scheduled" = "Notification scheduled. Relocation: %@.";
-"testResult.notDelivered" = "Notification was not delivered: %@";
-"testResult.notDeliveredPending" = "The request is still pending.";
-"testResult.notDeliveredSuppressed" = "macOS may have suppressed the banner because of Focus mode, notification style, or system notification policy.";
-"testResult.authorizationDenied" = "Notification permission was denied.";
-"testResult.failed" = "Notification failed: %@";
-"testResult.relocationReady" = "ready";
-"testResult.relocationPermissionRequired" = "permission required";
 
 "diagnosticsSummary.copiedTitle" = "Diagnostics Summary Copied";
 "diagnosticsSummary.copiedMessage" = "The diagnostics summary has been copied to the clipboard.";
