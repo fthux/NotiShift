@@ -39,7 +39,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
       AppLogger.shared.info("Accessibility permission missing")
       startPermissionPolling()
     }
-    menuBarController.rebuildMenu()
+    refreshMenuPermissionStatus()
 
     if CommandLine.arguments.contains("--send-system-notification") {
       DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
@@ -96,11 +96,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
 
   @discardableResult
   func menuBarControllerDidRequestNotificationSettings() -> Bool {
-    testNotificationSender.openNotificationSettings()
+    let didOpen = testNotificationSender.openNotificationSettings()
+    refreshMenuPermissionStatus()
+    return didOpen
   }
 
   func menuBarControllerDidRequestPreferences() {
     preferencesWindowController.showWindow(nil)
+  }
+
+  func menuBarControllerDidRequestAccessibilitySettings() {
+    permissionManager.openAccessibilitySettings()
+    startPermissionPolling()
+    refreshMenuPermissionStatus()
   }
 
   @discardableResult
@@ -109,7 +117,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     if permissionManager.isTrusted {
       startWatcherIfNeeded()
     }
-    menuBarController.rebuildMenu()
+    refreshMenuPermissionStatus()
     return permissionManager.isTrusted
   }
 
@@ -192,7 +200,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
       if self.permissionManager.isTrusted {
         AppLogger.shared.info("Accessibility permission granted")
         self.startWatcherIfNeeded()
-        self.menuBarController.rebuildMenu()
+        self.refreshMenuPermissionStatus()
       }
     }
     RunLoop.current.add(permissionTimer!, forMode: .common)
@@ -212,14 +220,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     if permissionManager.isTrusted {
       AppLogger.shared.info("Accessibility permission granted during \(action)")
       startWatcherIfNeeded()
-      menuBarController.rebuildMenu()
+      refreshMenuPermissionStatus()
       return true
     }
 
     showAccessibilityRequiredAlert()
     startPermissionPolling()
-    menuBarController.rebuildMenu()
+    refreshMenuPermissionStatus()
     return false
+  }
+
+  private func refreshMenuPermissionStatus() {
+    menuBarController.accessibilityPermissionGranted = permissionManager.isTrusted
+    testNotificationSender.permissionStatus { [weak self] status in
+      DispatchQueue.main.async {
+        guard let self else { return }
+        self.menuBarController.notificationPermissionStatus = status
+        self.menuBarController.accessibilityPermissionGranted = self.permissionManager.isTrusted
+        self.menuBarController.rebuildMenu()
+      }
+    }
+    menuBarController.rebuildMenu()
   }
 
   private func showAccessibilityRequiredAlert() {

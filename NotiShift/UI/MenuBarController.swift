@@ -5,6 +5,8 @@ protocol MenuBarControllerDelegate: AnyObject {
   func menuBarControllerDidToggleEnabled()
   func menuBarControllerDidSelectPosition()
   func menuBarControllerDidRequestPreferences()
+  func menuBarControllerDidRequestAccessibilitySettings()
+  func menuBarControllerDidRequestNotificationSettings() -> Bool
 }
 
 final class MenuBarController {
@@ -12,6 +14,8 @@ final class MenuBarController {
 
   private let preferences: NotiShiftPreferences
   private var statusItem: NSStatusItem?
+  var accessibilityPermissionGranted = false
+  var notificationPermissionStatus: NotificationPermissionStatus?
 
   init(preferences: NotiShiftPreferences) {
     self.preferences = preferences
@@ -54,6 +58,29 @@ final class MenuBarController {
     menu.addItem(positionItem)
 
     menu.addItem(.separator())
+
+    if accessibilityPermissionGranted {
+      let item = NSMenuItem(title: L10n.text("menu.accessibilityGranted"), action: nil, keyEquivalent: "")
+      item.isEnabled = false
+      menu.addItem(item)
+    } else {
+      let item = NSMenuItem(title: L10n.text("menu.openAccessibilitySettings"), action: #selector(openAccessibilitySettings), keyEquivalent: "")
+      item.target = self
+      menu.addItem(item)
+    }
+
+    if notificationPermissionStatus == .granted {
+      let item = NSMenuItem(title: L10n.text("menu.notificationGranted"), action: nil, keyEquivalent: "")
+      item.isEnabled = false
+      menu.addItem(item)
+    } else {
+      let item = NSMenuItem(title: L10n.text("menu.openNotificationSettings"), action: #selector(openNotificationSettings), keyEquivalent: "")
+      item.target = self
+      menu.addItem(item)
+    }
+
+    menu.addItem(.separator())
+
     let preferencesItem = NSMenuItem(title: L10n.text("menu.preferences"), action: #selector(showPreferences), keyEquivalent: ",")
     preferencesItem.target = self
     menu.addItem(preferencesItem)
@@ -85,6 +112,14 @@ final class MenuBarController {
 
   @objc private func showPreferences() {
     delegate?.menuBarControllerDidRequestPreferences()
+  }
+
+  @objc private func openAccessibilitySettings() {
+    delegate?.menuBarControllerDidRequestAccessibilitySettings()
+  }
+
+  @objc private func openNotificationSettings() {
+    _ = delegate?.menuBarControllerDidRequestNotificationSettings()
   }
 
   @objc private func showAbout() {

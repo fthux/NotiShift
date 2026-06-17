@@ -1,5 +1,9 @@
 "menu.enabled" = "启用";
 "menu.position" = "位置";
+"menu.openAccessibilitySettings" = "打开辅助功能设置";
+"menu.accessibilityGranted" = "辅助功能：已授权";
+"menu.openNotificationSettings" = "打开通知设置";
+"menu.notificationGranted" = "通知：已授权";
 "menu.preferences" = "偏好设置...";
 "menu.about" = "关于 Noti Shift";
 "menu.quit" = "退出 Noti Shift";
@@ -35,8 +39,10 @@
 "preferences.retryPermissionCheck" = "重新检查权限";
 "preferences.sendTestNotification" = "发送测试通知";
 "preferences.debugLogging" = "调试日志";
+"preferences.debugLoggingDescription" = "将更多细节写入本地日志文件，用于排查通知移动问题。";
 "preferences.restartWatcher" = "重启监听器";
 "preferences.openLogFile" = "打开日志文件";
+"preferences.clearLogs" = "清空日志";
 "preferences.copyDiagnosticsSummary" = "复制诊断摘要";
 "preferences.exportDiagnostics" = "导出诊断信息";
 "preferences.actionOpenedAccessibilitySettings" = "已打开辅助功能设置。";
@@ -56,6 +62,7 @@
 "preferences.actionWatcherRestartNeedsPermission" = "重启监听器前需要辅助功能权限。";
 "preferences.actionOpenedLogFile" = "已打开日志文件。";
 "preferences.actionOpenLogFileFailed" = "无法打开日志文件。";
+"preferences.actionLogsCleared" = "日志已清空。";
 "preferences.actionDiagnosticsCopied" = "诊断摘要已复制。";
 "preferences.actionDiagnosticsCopyFailed" = "无法复制诊断摘要。";
 "preferences.actionDiagnosticsExported" = "诊断信息已导出并在 Finder 中显示。";
@@ -70,11 +77,15 @@
 "alert.accessibilityRequiredMessage" = "Noti Shift 可以发送测试通知，但在当前应用版本被允许访问“系统设置 > 隐私与安全性 > 辅助功能”之前，无法移动 macOS 通知横幅。";
 "alert.launchAtLoginError" = "登录时启动错误";
 "alert.diagnosticsError" = "诊断错误";
+"alert.clearLogsError" = "清空日志错误";
+"alert.clearLogsConfirmationTitle" = "清空日志？";
+"alert.clearLogsConfirmationMessage" = "这会删除当前日志文件和轮转日志文件，且无法撤销。";
 
 "button.openSettings" = "打开设置";
 "button.openAccessibilitySettings" = "打开辅助功能设置";
 "button.openPreferences" = "打开偏好设置";
 "button.continue" = "继续";
+"button.cancel" = "取消";
 "button.ok" = "好";
 
 "onboarding.title" = "欢迎使用 Noti Shift";

@@ -35,6 +35,7 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
   private let languageLabel = NSTextField(labelWithString: "")
   private let themeLabel = NSTextField(labelWithString: "")
   private let debugLoggingButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
+  private let debugLoggingDescriptionLabel = NSTextField(labelWithString: "")
   private var localizedButtons: [(button: NSButton, titleKey: String)] = []
   private var localizedLabels: [(label: NSTextField, textKey: String)] = []
   private var notificationPermissionStatus: NotificationPermissionStatus?
@@ -204,8 +205,15 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
 
     debugLoggingButton.target = self
     debugLoggingButton.action = #selector(toggleDebugLogging)
+    debugLoggingDescriptionLabel.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
+    debugLoggingDescriptionLabel.textColor = .secondaryLabelColor
+    debugLoggingDescriptionLabel.maximumNumberOfLines = 2
+    debugLoggingDescriptionLabel.lineBreakMode = .byWordWrapping
+    debugLoggingDescriptionLabel.widthAnchor.constraint(equalToConstant: 390).isActive = true
+
     stack.addArrangedSubview(makeGroup([
       debugLoggingButton,
+      debugLoggingDescriptionLabel,
       makeActionRow(titleKey: "preferences.restartWatcher", symbolName: "arrow.triangle.2.circlepath", action: #selector(restartWatcher), showsChevron: false),
     ]))
     stack.addArrangedSubview(makeSeparator())
@@ -213,6 +221,7 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
       makeActionRow(titleKey: "preferences.openLogFile", symbolName: "doc.text.magnifyingglass", action: #selector(openLogFile)),
       makeActionRow(titleKey: "preferences.copyDiagnosticsSummary", symbolName: "doc.on.doc", action: #selector(copyDiagnosticsSummary), showsChevron: false),
       makeActionRow(titleKey: "preferences.exportDiagnostics", symbolName: "square.and.arrow.up", action: #selector(exportDiagnostics), showsChevron: false),
+      makeActionRow(titleKey: "preferences.clearLogs", symbolName: "trash", action: #selector(clearLogs), showsChevron: false),
     ]))
     pin(stack, to: view)
     return view
@@ -299,18 +308,21 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     let buttons = rows.map { row in
       row.map { position in
         let button = NSButton(title: position.displayName, target: self, action: #selector(selectPositionFromPicker(_:)))
-        button.bezelStyle = .texturedRounded
+        button.bezelStyle = .rounded
         button.setButtonType(.toggle)
+        button.font = NSFont.systemFont(ofSize: NSFont.systemFontSize, weight: .medium)
+        button.alignment = .center
         button.tag = NotificationPosition.allCases.firstIndex(of: position) ?? 0
-        button.widthAnchor.constraint(equalToConstant: 120).isActive = true
+        button.widthAnchor.constraint(equalToConstant: 128).isActive = true
+        button.heightAnchor.constraint(equalToConstant: 32).isActive = true
         positionButtons[position] = button
         return button
       }
     }
 
     let grid = NSGridView(views: buttons)
-    grid.rowSpacing = 6
-    grid.columnSpacing = 6
+    grid.rowSpacing = 8
+    grid.columnSpacing = 8
     return grid
   }
 
@@ -377,6 +389,7 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     positionPickerLabel.stringValue = L10n.text("preferences.positionPicker")
     automaticUpdatesButton.title = L10n.text("preferences.automaticallyCheckForUpdates")
     debugLoggingButton.title = L10n.text("preferences.debugLogging")
+    debugLoggingDescriptionLabel.stringValue = L10n.text("preferences.debugLoggingDescription")
     refreshRegisteredLocalizedViews()
     refreshNotificationStatusLabel()
     rebuildLanguageMenu()
@@ -408,8 +421,9 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
 
   private func refreshPositionPicker() {
     for (position, button) in positionButtons {
+      let isSelected = preferences.selectedPosition == position
       button.title = position.displayName
-      button.state = preferences.selectedPosition == position ? .on : .off
+      button.state = isSelected ? .on : .off
     }
   }
 
@@ -596,6 +610,23 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
 
   @objc private func openLogFile() {
     _ = NSWorkspace.shared.open(logger.logFileURL)
+  }
+
+  @objc private func clearLogs() {
+    let alert = NSAlert()
+    alert.alertStyle = .warning
+    alert.messageText = L10n.text("alert.clearLogsConfirmationTitle")
+    alert.informativeText = L10n.text("alert.clearLogsConfirmationMessage")
+    alert.addButton(withTitle: L10n.text("preferences.clearLogs"))
+    alert.addButton(withTitle: L10n.text("button.cancel"))
+    guard alert.runModal() == .alertFirstButtonReturn else { return }
+
+    do {
+      try logger.clearLogFiles()
+      sendFeedbackNotification(bodyKey: "preferences.actionLogsCleared")
+    } catch {
+      showAlert(title: L10n.text("alert.clearLogsError"), message: error.localizedDescription)
+    }
   }
 
   @objc private func copyDiagnosticsSummary() {

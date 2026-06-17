@@ -1,5 +1,9 @@
 "menu.enabled" = "Enabled";
 "menu.position" = "Position";
+"menu.openAccessibilitySettings" = "Open Accessibility Settings";
+"menu.accessibilityGranted" = "Accessibility: Granted";
+"menu.openNotificationSettings" = "Open Notification Settings";
+"menu.notificationGranted" = "Notifications: Granted";
 "menu.preferences" = "Preferences...";
 "menu.about" = "About Noti Shift";
 "menu.quit" = "Quit Noti Shift";
@@ -35,8 +39,10 @@
 "preferences.retryPermissionCheck" = "Retry Permission Check";
 "preferences.sendTestNotification" = "Send Test Notification";
 "preferences.debugLogging" = "Debug Logging";
+"preferences.debugLoggingDescription" = "Writes extra details to the local log file for troubleshooting notification movement.";
 "preferences.restartWatcher" = "Restart Watcher";
 "preferences.openLogFile" = "Open Log File";
+"preferences.clearLogs" = "Clear Logs";
 "preferences.copyDiagnosticsSummary" = "Copy Diagnostics Summary";
 "preferences.exportDiagnostics" = "Export Diagnostics";
 "preferences.actionOpenedAccessibilitySettings" = "Accessibility settings opened.";
@@ -56,6 +62,7 @@
 "preferences.actionWatcherRestartNeedsPermission" = "Accessibility permission is required before restarting the watcher.";
 "preferences.actionOpenedLogFile" = "Log file opened.";
 "preferences.actionOpenLogFileFailed" = "Could not open the log file.";
+"preferences.actionLogsCleared" = "Logs cleared.";
 "preferences.actionDiagnosticsCopied" = "Diagnostics summary copied.";
 "preferences.actionDiagnosticsCopyFailed" = "Could not copy diagnostics summary.";
 "preferences.actionDiagnosticsExported" = "Diagnostics exported and revealed in Finder.";
@@ -70,11 +77,15 @@
 "alert.accessibilityRequiredMessage" = "Noti Shift can send test notifications, but it cannot move macOS notification banners until the current app build is allowed in System Settings > Privacy & Security > Accessibility.";
 "alert.launchAtLoginError" = "Launch at Login Error";
 "alert.diagnosticsError" = "Diagnostics Error";
+"alert.clearLogsError" = "Clear Logs Error";
+"alert.clearLogsConfirmationTitle" = "Clear Logs?";
+"alert.clearLogsConfirmationMessage" = "This will delete the current log file and rotated log files. This cannot be undone.";
 
 "button.openSettings" = "Open Settings";
 "button.openAccessibilitySettings" = "Open Accessibility Settings";
 "button.openPreferences" = "Open Preferences";
 "button.continue" = "Continue";
+"button.cancel" = "Cancel";
 "button.ok" = "OK";
 
 "onboarding.title" = "Welcome to Noti Shift";
