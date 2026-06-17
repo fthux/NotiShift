@@ -29,6 +29,10 @@
 "preferences.checkForUpdatesNow" = "Check for Updates Now";
 "preferences.accessibilityGranted" = "Accessibility Status: Granted";
 "preferences.accessibilityRequired" = "Accessibility Status: Required";
+"preferences.notificationChecking" = "Notification Permission: Checking...";
+"preferences.notificationGranted" = "Notification Permission: Granted";
+"preferences.notificationDenied" = "Notification Permission: Denied";
+"preferences.notificationNotDetermined" = "Notification Permission: Not Determined";
 "preferences.openAccessibilitySettings" = "Open Accessibility Settings";
 "preferences.openNotificationSettings" = "Open Notification Settings";
 "preferences.retryPermissionCheck" = "Retry Permission Check";
@@ -40,6 +44,28 @@
 "preferences.openLogFile" = "Open Log File";
 "preferences.copyDiagnosticsSummary" = "Copy Diagnostics Summary";
 "preferences.exportDiagnostics" = "Export Diagnostics";
+"preferences.actionOpenedAccessibilitySettings" = "Accessibility settings opened.";
+"preferences.actionOpenAccessibilitySettingsFailed" = "Could not open Accessibility settings.";
+"preferences.actionOpenedNotificationSettings" = "Notification settings opened.";
+"preferences.actionOpenNotificationSettingsFailed" = "Could not open Notification settings.";
+"preferences.actionPermissionGranted" = "Accessibility permission is granted.";
+"preferences.actionPermissionStillRequired" = "Accessibility permission is still required.";
+"preferences.actionSendingTestNotification" = "Sending test notification...";
+"preferences.actionTestNotificationSent" = "Test notification sent.";
+"preferences.actionTestNotificationNotDelivered" = "The notification request was accepted, but no banner was delivered. %@";
+"preferences.actionTestNotificationDenied" = "Notification permission was denied.";
+"preferences.actionTestNotificationFailed" = "Notification failed: %@";
+"preferences.actionDebugLoggingEnabled" = "Debug logging enabled.";
+"preferences.actionDebugLoggingDisabled" = "Debug logging disabled.";
+"preferences.actionWatcherRestarted" = "Watcher restarted.";
+"preferences.actionWatcherRestartNeedsPermission" = "Accessibility permission is required before restarting the watcher.";
+"preferences.actionOpenedLogFile" = "Log file opened.";
+"preferences.actionOpenLogFileFailed" = "Could not open the log file.";
+"preferences.actionDiagnosticsCopied" = "Diagnostics summary copied.";
+"preferences.actionDiagnosticsCopyFailed" = "Could not copy diagnostics summary.";
+"preferences.actionDiagnosticsExported" = "Diagnostics exported and revealed in Finder.";
+"preferences.actionDiagnosticsExportFailed" = "Diagnostics export failed: %@";
+"language.system" = "System";
 
 "alert.accessibilityRequired" = "Accessibility Permission Required";
 "alert.accessibilityRequiredMessage" = "NotiShift can send test notifications, but it cannot move macOS notification banners until the current app build is allowed in System Settings > Privacy & Security > Accessibility.";
@@ -70,6 +96,9 @@
 "status.unknown" = "Unknown";
 
 "testResult.scheduled" = "Notification scheduled. Relocation: %@.";
+"testResult.notDelivered" = "Notification was not delivered: %@";
+"testResult.notDeliveredPending" = "The request is still pending.";
+"testResult.notDeliveredSuppressed" = "macOS may have suppressed the banner because of Focus mode, notification style, or system notification policy.";
 "testResult.authorizationDenied" = "Notification permission was denied.";
 "testResult.failed" = "Notification failed: %@";
 "testResult.relocationReady" = "ready";

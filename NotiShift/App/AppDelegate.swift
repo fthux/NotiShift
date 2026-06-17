@@ -71,15 +71,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
   }
 
   func menuBarControllerDidRequestTestNotification() {
+    sendTestNotification(hideApp: true)
+  }
+
+  private func sendTestNotification(hideApp: Bool, completion: ((TestNotificationResult) -> Void)? = nil) {
     let canRelocate = ensureAccessibilityForRelocation(action: "send system notification")
     if canRelocate {
       watcher.moveAll()
       watcher.moveRepeatedly()
     }
-    NSApp.hide(nil)
+    if hideApp {
+      NSApp.hide(nil)
+    }
     testNotificationSender.send { [weak self] result in
       DispatchQueue.main.async {
         self?.recordTestNotificationResult(result, canRelocate: canRelocate)
+        completion?(result)
       }
     }
     if canRelocate {
@@ -87,7 +94,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     }
   }
 
-  func menuBarControllerDidRequestNotificationSettings() {
+  @discardableResult
+  func menuBarControllerDidRequestNotificationSettings() -> Bool {
     testNotificationSender.openNotificationSettings()
   }
 
@@ -95,24 +103,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     preferencesWindowController.showWindow(nil)
   }
 
-  func menuBarControllerDidRequestPermissionCheck() {
+  @discardableResult
+  func menuBarControllerDidRequestPermissionCheck() -> Bool {
     _ = permissionManager.requestIfNeeded(prompt: false)
     if permissionManager.isTrusted {
       startWatcherIfNeeded()
     }
     menuBarController.rebuildMenu()
+    return permissionManager.isTrusted
   }
 
-  func menuBarControllerDidRequestRestartWatcher() {
+  @discardableResult
+  func menuBarControllerDidRequestRestartWatcher() -> Bool {
     guard permissionManager.isTrusted else {
       permissionManager.openAccessibilitySettings()
-      return
+      return false
     }
     watcher.restart()
+    return true
   }
 
-  func preferencesDidRequestPermissionCheck() {
+  func preferencesDidRequestPermissionCheck() -> Bool {
     menuBarControllerDidRequestPermissionCheck()
+  }
+
+  func preferencesDidRequestNotificationPermissionStatus(completion: @escaping (NotificationPermissionStatus) -> Void) {
+    testNotificationSender.permissionStatus(completion: completion)
   }
 
   func preferencesDidSelectPosition() {
@@ -120,15 +136,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     menuBarController.rebuildMenu()
   }
 
-  func preferencesDidRequestNotificationSettings() {
+  func preferencesDidRequestNotificationSettings() -> Bool {
     menuBarControllerDidRequestNotificationSettings()
   }
 
-  func preferencesDidRequestTestNotification() {
-    menuBarControllerDidRequestTestNotification()
+  func preferencesDidRequestTestNotification(completion: @escaping (TestNotificationResult) -> Void) {
+    sendTestNotification(hideApp: false, completion: completion)
   }
 
-  func preferencesDidRequestRestartWatcher() {
+  func preferencesDidRequestRestartWatcher() -> Bool {
     menuBarControllerDidRequestRestartWatcher()
   }
 
@@ -218,10 +234,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
       : L10n.text("testResult.relocationPermissionRequired")
 
     switch result {
-    case .scheduled:
+    case .scheduled, .delivered:
       preferences.lastTestNotificationResult = String(
         format: L10n.text("testResult.scheduled"),
         relocationStatus
+      )
+    case let .notDelivered(reason):
+      preferences.lastTestNotificationResult = String(
+        format: L10n.text("testResult.notDelivered"),
+        reason
       )
     case .authorizationDenied:
       preferences.lastTestNotificationResult = L10n.text("testResult.authorizationDenied")

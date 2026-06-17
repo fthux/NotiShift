@@ -2,8 +2,16 @@ import Foundation
 import AppKit
 import UserNotifications
 
+enum NotificationPermissionStatus {
+  case granted
+  case denied
+  case notDetermined
+}
+
 enum TestNotificationResult {
   case scheduled
+  case delivered
+  case notDelivered(String)
   case authorizationDenied
   case failed(String)
 }
@@ -11,12 +19,34 @@ enum TestNotificationResult {
 final class TestNotificationSender {
   private let logger = AppLogger.shared
 
+  func permissionStatus(completion: @escaping (NotificationPermissionStatus) -> Void) {
+    UNUserNotificationCenter.current().getNotificationSettings { settings in
+      switch settings.authorizationStatus {
+      case .authorized, .provisional, .ephemeral:
+        let canPresentAlert = settings.alertSetting == .enabled
+        let hasVisibleAlertStyle: Bool
+        if #available(macOS 11.0, *) {
+          hasVisibleAlertStyle = settings.alertStyle != .none
+        } else {
+          hasVisibleAlertStyle = true
+        }
+        completion(canPresentAlert && hasVisibleAlertStyle ? .granted : .denied)
+      case .denied:
+        completion(.denied)
+      case .notDetermined:
+        completion(.notDetermined)
+      @unknown default:
+        completion(.notDetermined)
+      }
+    }
+  }
+
   func send(completion: @escaping (TestNotificationResult) -> Void) {
     requestAuthorization { [weak self] result in
       switch result {
       case .scheduled:
         self?.sendModernUserNotification(completion: completion)
-      case .authorizationDenied, .failed:
+      case .delivered, .notDelivered, .authorizationDenied, .failed:
         completion(result)
       }
     }
@@ -53,16 +83,17 @@ final class TestNotificationSender {
     }
   }
 
-  func openNotificationSettings() {
+  @discardableResult
+  func openNotificationSettings() -> Bool {
     let candidates = [
       "x-apple.systempreferences:com.apple.Notifications-Settings.extension",
       "x-apple.systempreferences:com.apple.preference.notifications",
     ]
     for candidate in candidates {
       guard let url = URL(string: candidate) else { continue }
-      if NSWorkspace.shared.open(url) { return }
+      if NSWorkspace.shared.open(url) { return true }
     }
-    NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/System Settings.app"))
+    return NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/System Settings.app"))
   }
 
   private func sendModernUserNotification(completion: @escaping (TestNotificationResult) -> Void) {
@@ -90,14 +121,29 @@ final class TestNotificationSender {
         completion(.failed(error.localizedDescription))
       } else {
         self?.logger.info("Scheduled modern UNNotification request id=\(request.identifier)")
-        completion(.scheduled)
-        center.getPendingNotificationRequests { requests in
-          let contains = requests.contains { $0.identifier == request.identifier }
-          self?.logger.info("Pending modern notification id=\(request.identifier) present=\(contains)")
+        self?.confirmDelivery(for: request.identifier, completion: completion)
+      }
+    }
+  }
+
+  private func confirmDelivery(for requestIdentifier: String, completion: @escaping (TestNotificationResult) -> Void) {
+    let center = UNUserNotificationCenter.current()
+    DispatchQueue.global().asyncAfter(deadline: .now() + 1.0) { [weak self] in
+      center.getDeliveredNotifications { notifications in
+        let isDelivered = notifications.contains { $0.request.identifier == requestIdentifier }
+        self?.logger.info("Delivered modern notification id=\(requestIdentifier) present=\(isDelivered)")
+        guard !isDelivered else {
+          completion(.delivered)
+          return
         }
-        center.getDeliveredNotifications { notifications in
-          let contains = notifications.contains { $0.request.identifier == request.identifier }
-          self?.logger.info("Delivered modern notification id=\(request.identifier) present=\(contains)")
+
+        center.getPendingNotificationRequests { requests in
+          let isPending = requests.contains { $0.identifier == requestIdentifier }
+          self?.logger.info("Pending modern notification id=\(requestIdentifier) present=\(isPending)")
+          let reason = isPending
+            ? L10n.text("testResult.notDeliveredPending")
+            : L10n.text("testResult.notDeliveredSuppressed")
+          completion(.notDelivered(reason))
         }
       }
     }

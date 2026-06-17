@@ -4,27 +4,31 @@ import Foundation
 
 final class AccessibilityPermissionManager {
   var isTrusted: Bool {
-    AXIsProcessTrusted()
+    trustStatus(prompt: false)
   }
 
   @discardableResult
   func requestIfNeeded(prompt: Bool) -> Bool {
-    guard prompt else { return AXIsProcessTrusted() }
+    trustStatus(prompt: prompt)
+  }
+
+  func trustStatus(prompt: Bool) -> Bool {
     let options = [
-      kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true
+      kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: prompt
     ] as CFDictionary
     return AXIsProcessTrustedWithOptions(options)
   }
 
-  func openAccessibilitySettings() {
+  @discardableResult
+  func openAccessibilitySettings() -> Bool {
     let candidates = [
       "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility",
       "x-apple.systempreferences:com.apple.Security-Privacy.extension?Privacy_Accessibility",
     ]
     for candidate in candidates {
       guard let url = URL(string: candidate) else { continue }
-      if NSWorkspace.shared.open(url) { return }
+      if NSWorkspace.shared.open(url) { return true }
     }
-    NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/System Settings.app"))
+    return NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/System Settings.app"))
   }
 }

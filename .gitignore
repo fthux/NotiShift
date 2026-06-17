@@ -38,3 +38,4 @@ NotiShift-Diagnostics-*.txt
 *.mobileprovision
 *.provisionprofile
 *.xcconfig.local
+.codegraph/

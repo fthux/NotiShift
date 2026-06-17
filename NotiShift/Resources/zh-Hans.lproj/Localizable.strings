@@ -29,6 +29,10 @@
 "preferences.checkForUpdatesNow" = "立即检查更新";
 "preferences.accessibilityGranted" = "辅助功能权限：已授权";
 "preferences.accessibilityRequired" = "辅助功能权限：需要授权";
+"preferences.notificationChecking" = "通知权限：正在检查...";
+"preferences.notificationGranted" = "通知权限：已授权";
+"preferences.notificationDenied" = "通知权限：已拒绝";
+"preferences.notificationNotDetermined" = "通知权限：尚未决定";
 "preferences.openAccessibilitySettings" = "打开辅助功能设置";
 "preferences.openNotificationSettings" = "打开通知设置";
 "preferences.retryPermissionCheck" = "重新检查权限";
@@ -40,6 +44,28 @@
 "preferences.openLogFile" = "打开日志文件";
 "preferences.copyDiagnosticsSummary" = "复制诊断摘要";
 "preferences.exportDiagnostics" = "导出诊断信息";
+"preferences.actionOpenedAccessibilitySettings" = "已打开辅助功能设置。";
+"preferences.actionOpenAccessibilitySettingsFailed" = "无法打开辅助功能设置。";
+"preferences.actionOpenedNotificationSettings" = "已打开通知设置。";
+"preferences.actionOpenNotificationSettingsFailed" = "无法打开通知设置。";
+"preferences.actionPermissionGranted" = "辅助功能权限已授权。";
+"preferences.actionPermissionStillRequired" = "仍需要辅助功能权限。";
+"preferences.actionSendingTestNotification" = "正在发送测试通知...";
+"preferences.actionTestNotificationSent" = "测试通知已发送。";
+"preferences.actionTestNotificationNotDelivered" = "系统已接收通知请求，但没有投递横幅。%@";
+"preferences.actionTestNotificationDenied" = "通知权限被拒绝。";
+"preferences.actionTestNotificationFailed" = "通知失败：%@";
+"preferences.actionDebugLoggingEnabled" = "调试日志已开启。";
+"preferences.actionDebugLoggingDisabled" = "调试日志已关闭。";
+"preferences.actionWatcherRestarted" = "监听器已重启。";
+"preferences.actionWatcherRestartNeedsPermission" = "重启监听器前需要辅助功能权限。";
+"preferences.actionOpenedLogFile" = "已打开日志文件。";
+"preferences.actionOpenLogFileFailed" = "无法打开日志文件。";
+"preferences.actionDiagnosticsCopied" = "诊断摘要已复制。";
+"preferences.actionDiagnosticsCopyFailed" = "无法复制诊断摘要。";
+"preferences.actionDiagnosticsExported" = "诊断信息已导出并在 Finder 中显示。";
+"preferences.actionDiagnosticsExportFailed" = "诊断信息导出失败：%@";
+"language.system" = "跟随系统";
 
 "alert.accessibilityRequired" = "需要辅助功能权限";
 "alert.accessibilityRequiredMessage" = "NotiShift 可以发送测试通知，但在当前应用版本被允许访问“系统设置 > 隐私与安全性 > 辅助功能”之前，无法移动 macOS 通知横幅。";
@@ -70,6 +96,9 @@
 "status.unknown" = "未知";
 
 "testResult.scheduled" = "通知已加入系统队列。重定位：%@。";
+"testResult.notDelivered" = "通知未投递：%@";
+"testResult.notDeliveredPending" = "请求仍在等待处理。";
+"testResult.notDeliveredSuppressed" = "macOS 可能因为专注模式、通知样式或系统通知策略抑制了横幅显示。";
 "testResult.authorizationDenied" = "通知权限被拒绝。";
 "testResult.failed" = "通知失败：%@";
 "testResult.relocationReady" = "已就绪";
