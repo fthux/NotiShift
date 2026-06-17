@@ -2,7 +2,7 @@ import CoreGraphics
 import Foundation
 
 enum AppConstants {
-  static let appName = "NotiShift"
+  static let appName = "Noti Shift"
   static let bundleIdentifier = "com.fthux.NotiShift"
   static let subsystem = "com.fthux.NotiShift"
   static let latestReleaseURL = URL(string: "https://api.github.com/repos/fthux/NotiShift/releases/latest")!

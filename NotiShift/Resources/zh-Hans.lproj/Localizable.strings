@@ -1,8 +1,8 @@
 "menu.enabled" = "启用";
 "menu.position" = "位置";
 "menu.preferences" = "偏好设置...";
-"menu.about" = "关于 NotiShift";
-"menu.quit" = "退出 NotiShift";
+"menu.about" = "关于 Noti Shift";
+"menu.quit" = "退出 Noti Shift";
 
 "position.topLeft" = "左上";
 "position.topCenter" = "顶部居中";
@@ -21,10 +21,6 @@
 "preferences.launchAtLogin" = "登录时启动";
 "preferences.language" = "语言";
 "preferences.positionPicker" = "通知位置";
-"preferences.notPaused" = "未暂停";
-"preferences.pauseUntil" = "已暂停至 %@";
-"preferences.pauseForOneHour" = "暂停 1 小时";
-"preferences.resumeNow" = "立即恢复";
 "preferences.automaticallyCheckForUpdates" = "自动检查更新";
 "preferences.checkForUpdatesNow" = "立即检查更新";
 "preferences.accessibilityGranted" = "辅助功能权限：已授权";
@@ -68,7 +64,7 @@
 "language.system" = "跟随系统";
 
 "alert.accessibilityRequired" = "需要辅助功能权限";
-"alert.accessibilityRequiredMessage" = "NotiShift 可以发送测试通知，但在当前应用版本被允许访问“系统设置 > 隐私与安全性 > 辅助功能”之前，无法移动 macOS 通知横幅。";
+"alert.accessibilityRequiredMessage" = "Noti Shift 可以发送测试通知，但在当前应用版本被允许访问“系统设置 > 隐私与安全性 > 辅助功能”之前，无法移动 macOS 通知横幅。";
 "alert.launchAtLoginError" = "登录时启动错误";
 "alert.diagnosticsError" = "诊断错误";
 
@@ -78,15 +74,14 @@
 "button.continue" = "继续";
 "button.ok" = "好";
 
-"onboarding.title" = "欢迎使用 NotiShift";
+"onboarding.title" = "欢迎使用 Noti Shift";
 "onboarding.heading" = "设置通知横幅出现的位置";
-"onboarding.body" = "NotiShift 在菜单栏中运行，并将 macOS 通知横幅移动到你选择的位置。";
+"onboarding.body" = "Noti Shift 在菜单栏中运行，并将 macOS 通知横幅移动到你选择的位置。";
 "onboarding.steps" = "1. 授予辅助功能权限。\n2. 在菜单栏图标中选择通知位置。\n3. 在“偏好设置 > 权限”中发送测试通知。";
 
 "status.enabled" = "启用：%@";
 "status.accessibility" = "辅助功能：%@";
 "status.position" = "位置：%@";
-"status.pause" = "暂停：%@";
 "status.displays" = "显示器：%d";
 "status.version" = "版本：%@";
 "status.on" = "开启";
@@ -107,9 +102,9 @@
 "diagnosticsSummary.copiedTitle" = "已复制诊断摘要";
 "diagnosticsSummary.copiedMessage" = "诊断摘要已复制到剪贴板。";
 
-"update.upToDateTitle" = "NotiShift 已是最新版本";
+"update.upToDateTitle" = "Noti Shift 已是最新版本";
 "update.upToDateMessage" = "当前正在使用版本 %@。";
-"update.availableTitle" = "NotiShift %@ 可用";
+"update.availableTitle" = "Noti Shift %@ 可用";
 "update.availableMessage" = "当前版本：%@\n最新版本：%@\n\n请打开 GitHub Release 页面手动下载并安装。";
 "update.openRelease" = "打开 GitHub Release";
 "update.errorTitle" = "无法检查更新";
@@ -118,6 +113,6 @@
 "update.errorInvalidReleaseURL" = "最新 release 链接无效。";
 "update.errorInvalidVersion" = "无法比较当前版本 %@ 和最新版本 %@。";
 
-"notification.testTitle" = "NotiShift 测试";
+"notification.testTitle" = "Noti Shift 测试";
 "notification.testSubtitle" = "位置检查";
 "notification.testBody" = "这条通知应显示在所选位置。";

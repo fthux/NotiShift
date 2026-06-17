@@ -33,7 +33,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
   private let automaticUpdatesButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
   private let positionPickerLabel = NSTextField(labelWithString: "")
   private var positionButtons: [NotificationPosition: NSButton] = [:]
-  private let pauseStatusLabel = NSTextField(labelWithString: "")
   private let accessibilityStatusLabel = NSTextField(labelWithString: "")
   private let notificationStatusLabel = NSTextField(labelWithString: "")
   private let testNotificationResultLabel = NSTextField(wrappingLabelWithString: "")
@@ -153,10 +152,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     automaticUpdatesButton.target = self
     automaticUpdatesButton.action = #selector(toggleAutomaticallyCheckForUpdates)
     let checkUpdatesButton = makeLocalizedButton(titleKey: "preferences.checkForUpdatesNow", action: #selector(checkForUpdatesNow))
-    pauseStatusLabel.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
-    pauseStatusLabel.textColor = .secondaryLabelColor
-    let pauseButton = makeLocalizedButton(titleKey: "preferences.pauseForOneHour", action: #selector(pauseForOneHour))
-    let resumeButton = makeLocalizedButton(titleKey: "preferences.resumeNow", action: #selector(resumeNow))
 
     stack.addArrangedSubview(makeGroup([
       launchAtLoginButton,
@@ -171,12 +166,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     stack.addArrangedSubview(makeGroup([
       positionPickerLabel,
       makePositionPicker(),
-    ]))
-    stack.addArrangedSubview(makeSeparator())
-    stack.addArrangedSubview(makeGroup([
-      pauseStatusLabel,
-      pauseButton,
-      resumeButton,
     ]))
     pin(stack, to: view)
     return view
@@ -440,7 +429,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     automaticUpdatesButton.title = L10n.text("preferences.automaticallyCheckForUpdates")
     debugLoggingButton.title = L10n.text("preferences.debugLogging")
     refreshRegisteredLocalizedViews()
-    refreshPauseStatus()
     refreshNotificationStatusLabel()
     rebuildLanguageMenu()
 
@@ -494,18 +482,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     for (position, button) in positionButtons {
       button.title = position.displayName
       button.state = preferences.selectedPosition == position ? .on : .off
-    }
-  }
-
-  private func refreshPauseStatus() {
-    if let pauseUntil = preferences.pauseUntil, pauseUntil > Date() {
-      pauseStatusLabel.stringValue = String(
-        format: L10n.text("preferences.pauseUntil"),
-        DateFormatter.localizedString(from: pauseUntil, dateStyle: .none, timeStyle: .short)
-      )
-    } else {
-      preferences.pauseUntil = nil
-      pauseStatusLabel.stringValue = L10n.text("preferences.notPaused")
     }
   }
 
@@ -592,16 +568,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
 
   @objc private func toggleAutomaticallyCheckForUpdates() {
     preferences.automaticallyCheckForUpdates = automaticUpdatesButton.state == .on
-  }
-
-  @objc private func pauseForOneHour() {
-    preferences.pauseUntil = Date().addingTimeInterval(60 * 60)
-    refresh()
-  }
-
-  @objc private func resumeNow() {
-    preferences.pauseUntil = nil
-    refresh()
   }
 
   @objc private func selectPositionFromPicker(_ sender: NSButton) {
@@ -765,34 +731,22 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     let accessibility = permissionManager.isTrusted ? L10n.text("status.granted") : L10n.text("status.required")
     let automaticUpdates = preferences.automaticallyCheckForUpdates ? L10n.text("status.on") : L10n.text("status.off")
     let debugLogging = preferences.debugLoggingEnabled ? L10n.text("status.on") : L10n.text("status.off")
-    let pause = pauseStatusText()
     let displays = NSScreen.screens.count
     let lastTest = preferences.lastTestNotificationResult ?? L10n.text("preferences.lastTestResultNone")
 
     return """
-    NotiShift Diagnostics Summary
+    Noti Shift Diagnostics Summary
     App Version: \(appVersion)
     Build: \(buildVersion)
     macOS: \(operatingSystemVersion.majorVersion).\(operatingSystemVersion.minorVersion).\(operatingSystemVersion.patchVersion)
     Enabled: \(enabled)
     Accessibility: \(accessibility)
     Position: \(preferences.selectedPosition.displayName)
-    Pause: \(pause)
     Displays: \(displays)
     Automatically Check for Updates: \(automaticUpdates)
     Debug Logging: \(debugLogging)
     Last Test: \(lastTest)
     """
-  }
-
-  private func pauseStatusText() -> String {
-    if let pauseUntil = preferences.pauseUntil, pauseUntil > Date() {
-      return String(
-        format: L10n.text("preferences.pauseUntil"),
-        DateFormatter.localizedString(from: pauseUntil, dateStyle: .none, timeStyle: .short)
-      )
-    }
-    return L10n.text("preferences.notPaused")
   }
 
   private func showAlert(title: String, message: String) {

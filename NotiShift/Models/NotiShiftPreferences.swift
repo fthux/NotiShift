@@ -10,7 +10,6 @@ enum PreferencesKey {
   static let hasCompletedOnboarding = "hasCompletedOnboarding"
   static let lastOnboardingPromptVersion = "lastOnboardingPromptVersion"
   static let lastTestNotificationResult = "lastTestNotificationResult"
-  static let pauseUntil = "pauseUntil"
 }
 
 enum AppLanguage: String, CaseIterable {
@@ -95,19 +94,5 @@ final class NotiShiftPreferences {
   var lastTestNotificationResult: String? {
     get { defaults.string(forKey: PreferencesKey.lastTestNotificationResult) }
     set { defaults.set(newValue, forKey: PreferencesKey.lastTestNotificationResult) }
-  }
-
-  var pauseUntil: Date? {
-    get { defaults.object(forKey: PreferencesKey.pauseUntil) as? Date }
-    set { defaults.set(newValue, forKey: PreferencesKey.pauseUntil) }
-  }
-
-  var isPaused: Bool {
-    guard let pauseUntil else { return false }
-    if pauseUntil > Date() {
-      return true
-    }
-    self.pauseUntil = nil
-    return false
   }
 }

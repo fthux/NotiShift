@@ -23,8 +23,8 @@ final class DiagnosticsExporter {
     }.joined(separator: "\n")
 
     let content = """
-    NotiShift Diagnostics
-    =====================
+    Noti Shift Diagnostics
+    ======================
     macOS: \(version.majorVersion).\(version.minorVersion).\(version.patchVersion)
     Profile: \(profile.generation.rawValue)
     AXTrusted: \(AXIsProcessTrusted())

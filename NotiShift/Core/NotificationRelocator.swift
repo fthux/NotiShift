@@ -17,11 +17,6 @@ final class NotificationRelocator {
   }
 
   func move(windows: [AXUIElement]) {
-    guard !preferences.isPaused else {
-      restoreShiftedWindows(windows, reason: "paused")
-      return
-    }
-
     guard preferences.isEnabled else {
       restoreShiftedWindows(windows, reason: "disabled")
       return
