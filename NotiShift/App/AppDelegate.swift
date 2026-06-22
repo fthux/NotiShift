@@ -11,6 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
   private let profile = CompatibilityProfile.current
   private lazy var diagnosticsExporter = DiagnosticsExporter(profile: profile)
   private var permissionTimer: Timer?
+  private var didShowMissingAccessibilityOnboarding = false
   private var watcherIsStarted = false
   private lazy var watcher = NotificationCenterWatcher(profile: profile, preferences: preferences)
   private lazy var menuBarController = MenuBarController(preferences: preferences)
@@ -309,6 +310,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
 
   private func showOnboardingIfNeeded() {
     guard shouldShowOnboarding else { return }
+    if !permissionManager.isTrusted {
+      didShowMissingAccessibilityOnboarding = true
+    }
     preferences.lastOnboardingPromptVersion = currentAppVersion
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
       self?.onboardingWindowController.showWindow(nil)
@@ -321,6 +325,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, MenuBarControllerDeleg
     }
     guard !permissionManager.isTrusted else {
       return false
+    }
+    if !didShowMissingAccessibilityOnboarding {
+      return true
     }
     return preferences.lastOnboardingPromptVersion != currentAppVersion
   }
