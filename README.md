@@ -1,13 +1,29 @@
+<div align="center">
+
+<img src="NotiShift/Resources/NotiShiftIcon.png" alt="Noti Shift" width="120" />
+
 # Noti Shift
+
+English | [简体中文](README.zh-CN.md)
 
 Control system notification banner position on macOS.
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/fthux/NotiShift)
+
 <img width="512" src="screenshots/notification.png" alt="Noti Shift showing notification banners in multiple positions" />
+
+</div>
 
 ## Installation
 
 ```bash
 brew install fthux/brew/notishift
+```
+
+Run after installation:
+
+```bash
+notishift
 ```
 
 ## Usage

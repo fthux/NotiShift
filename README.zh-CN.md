@@ -1,13 +1,29 @@
+<div align="center">
+
+<img src="NotiShift/Resources/NotiShiftIcon.png" alt="Noti Shift" width="120" />
+
 # Noti Shift
+
+简体中文 | [English](README.md)
 
 控制 macOS 系统通知横幅的位置。
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/fthux/NotiShift)
+
 <img width="512" src="screenshots/notification.png" alt="Noti Shift 在多个位置显示通知横幅" />
+
+</div>
 
 ## 安装
 
 ```bash
 brew install fthux/brew/notishift
+```
+
+安装后运行：
+
+```bash
+notishift
 ```
 
 ## 使用
