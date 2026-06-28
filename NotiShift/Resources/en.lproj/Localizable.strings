@@ -88,6 +88,13 @@
 "button.cancel" = "Cancel";
 "button.ok" = "OK";
 
+"letsMove.title" = "Move Noti Shift to Applications?";
+"letsMove.message" = "Noti Shift works best from the Applications folder. Move it there now and reopen it from the new location?";
+"letsMove.moveButton" = "Move to Applications";
+"letsMove.notNowButton" = "Not Now";
+"letsMove.errorTitle" = "Could Not Move Noti Shift";
+"letsMove.errorMessage" = "Noti Shift could not be moved automatically: %@\n\nYou can move it to the Applications folder manually.";
+
 "onboarding.title" = "Welcome to Noti Shift";
 "onboarding.heading" = "Set where notification banners appear";
 "onboarding.body" = "Noti Shift runs from the menu bar and moves macOS notification banners to the position you choose.";

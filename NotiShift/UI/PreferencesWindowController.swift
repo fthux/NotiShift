@@ -20,14 +20,14 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
   private let permissionManager: AccessibilityPermissionManager
   private let launchAtLoginManager: LaunchAtLoginManager
   private let diagnosticsExporter: DiagnosticsExporter
-  private let updateChecker: UpdateChecker
+  // private let updateChecker: UpdateChecker
   private let logger = AppLogger.shared
 
   private let tabView = NSTabView()
   private let launchAtLoginButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
   private let languagePopup = NSPopUpButton()
   private let themePopup = NSPopUpButton()
-  private let automaticUpdatesButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
+  // private let automaticUpdatesButton = NSButton(checkboxWithTitle: "", target: nil, action: nil)
   private let positionPickerLabel = NSTextField(labelWithString: "")
   private var positionButtons: [NotificationPosition: NSButton] = [:]
   private let accessibilityStatusLabel = NSTextField(labelWithString: "")
@@ -46,14 +46,14 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     preferences: NotiShiftPreferences,
     permissionManager: AccessibilityPermissionManager,
     launchAtLoginManager: LaunchAtLoginManager,
-    diagnosticsExporter: DiagnosticsExporter,
-    updateChecker: UpdateChecker
+    diagnosticsExporter: DiagnosticsExporter
+    // updateChecker: UpdateChecker
   ) {
     self.preferences = preferences
     self.permissionManager = permissionManager
     self.launchAtLoginManager = launchAtLoginManager
     self.diagnosticsExporter = diagnosticsExporter
-    self.updateChecker = updateChecker
+    // self.updateChecker = updateChecker
 
     let window = NSWindow(
       contentRect: NSRect(x: 0, y: 0, width: 520, height: 390),
@@ -154,14 +154,14 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     themeRow.addArrangedSubview(themeLabel)
     themeRow.addArrangedSubview(themePopup)
 
-    automaticUpdatesButton.target = self
-    automaticUpdatesButton.action = #selector(toggleAutomaticallyCheckForUpdates)
-    let checkUpdatesButton = makeLocalizedButton(titleKey: "preferences.checkForUpdatesNow", action: #selector(checkForUpdatesNow))
+    // automaticUpdatesButton.target = self
+    // automaticUpdatesButton.action = #selector(toggleAutomaticallyCheckForUpdates)
+    // let checkUpdatesButton = makeLocalizedButton(titleKey: "preferences.checkForUpdatesNow", action: #selector(checkForUpdatesNow))
 
     stack.addArrangedSubview(makeGroup([
       launchAtLoginButton,
-      automaticUpdatesButton,
-      checkUpdatesButton,
+      // automaticUpdatesButton,
+      // checkUpdatesButton,
     ]))
     stack.addArrangedSubview(makeSeparator())
     stack.addArrangedSubview(makeGroup([
@@ -387,7 +387,7 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     languageLabel.stringValue = L10n.text("preferences.language")
     themeLabel.stringValue = L10n.text("preferences.theme")
     positionPickerLabel.stringValue = L10n.text("preferences.positionPicker")
-    automaticUpdatesButton.title = L10n.text("preferences.automaticallyCheckForUpdates")
+    // automaticUpdatesButton.title = L10n.text("preferences.automaticallyCheckForUpdates")
     debugLoggingButton.title = L10n.text("preferences.debugLogging")
     debugLoggingDescriptionLabel.stringValue = L10n.text("preferences.debugLoggingDescription")
     refreshRegisteredLocalizedViews()
@@ -396,7 +396,7 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     rebuildThemeMenu()
 
     launchAtLoginButton.state = launchAtLoginManager.isEnabled ? .on : .off
-    automaticUpdatesButton.state = preferences.automaticallyCheckForUpdates ? .on : .off
+    // automaticUpdatesButton.state = preferences.automaticallyCheckForUpdates ? .on : .off
     debugLoggingButton.state = preferences.debugLoggingEnabled ? .on : .off
     refreshPermissionStatuses()
 
@@ -528,9 +528,9 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     refresh()
   }
 
-  @objc private func toggleAutomaticallyCheckForUpdates() {
-    preferences.automaticallyCheckForUpdates = automaticUpdatesButton.state == .on
-  }
+  // @objc private func toggleAutomaticallyCheckForUpdates() {
+  //   preferences.automaticallyCheckForUpdates = automaticUpdatesButton.state == .on
+  // }
 
   @objc private func selectPositionFromPicker(_ sender: NSButton) {
     guard NotificationPosition.allCases.indices.contains(sender.tag) else {
@@ -542,32 +542,32 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     refresh()
   }
 
-  @objc private func checkForUpdatesNow() {
-    Task { @MainActor in
-      await showUpdateCheckResult(showUpToDate: true)
-    }
-  }
-
-  @MainActor
-  func showUpdateCheckResult(showUpToDate: Bool) async {
-    do {
-      preferences.lastUpdateCheckAt = Date()
-      let result = try await updateChecker.check()
-      switch result {
-      case let .upToDate(currentVersion):
-        guard showUpToDate else { return }
-        showAlert(
-          title: L10n.text("update.upToDateTitle"),
-          message: String(format: L10n.text("update.upToDateMessage"), currentVersion)
-        )
-      case let .updateAvailable(currentVersion, release):
-        showUpdateAvailableAlert(currentVersion: currentVersion, release: release)
-      }
-    } catch {
-      guard showUpToDate else { return }
-      showAlert(title: L10n.text("update.errorTitle"), message: error.localizedDescription)
-    }
-  }
+  // @objc private func checkForUpdatesNow() {
+  //   Task { @MainActor in
+  //     await showUpdateCheckResult(showUpToDate: true)
+  //   }
+  // }
+  //
+  // @MainActor
+  // func showUpdateCheckResult(showUpToDate: Bool) async {
+  //   do {
+  //     preferences.lastUpdateCheckAt = Date()
+  //     let result = try await updateChecker.check()
+  //     switch result {
+  //     case let .upToDate(currentVersion):
+  //       guard showUpToDate else { return }
+  //       showAlert(
+  //         title: L10n.text("update.upToDateTitle"),
+  //         message: String(format: L10n.text("update.upToDateMessage"), currentVersion)
+  //       )
+  //     case let .updateAvailable(currentVersion, release):
+  //       showUpdateAvailableAlert(currentVersion: currentVersion, release: release)
+  //     }
+  //   } catch {
+  //     guard showUpToDate else { return }
+  //     showAlert(title: L10n.text("update.errorTitle"), message: error.localizedDescription)
+  //   }
+  // }
 
   @objc private func openAccessibilitySettings() {
     _ = permissionManager.openAccessibilitySettings()
@@ -652,7 +652,7 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     let buildVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? L10n.text("status.unknown")
     let enabled = preferences.isEnabled ? L10n.text("status.on") : L10n.text("status.off")
     let accessibility = permissionManager.isTrusted ? L10n.text("status.granted") : L10n.text("status.required")
-    let automaticUpdates = preferences.automaticallyCheckForUpdates ? L10n.text("status.on") : L10n.text("status.off")
+    // let automaticUpdates = preferences.automaticallyCheckForUpdates ? L10n.text("status.on") : L10n.text("status.off")
     let debugLogging = preferences.debugLoggingEnabled ? L10n.text("status.on") : L10n.text("status.off")
     let displays = NSScreen.screens.count
 
@@ -665,7 +665,6 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     Accessibility: \(accessibility)
     Position: \(preferences.selectedPosition.displayName)
     Displays: \(displays)
-    Automatically Check for Updates: \(automaticUpdates)
     Debug Logging: \(debugLogging)
     """
   }
@@ -685,23 +684,23 @@ final class PreferencesWindowController: NSWindowController, NSTabViewDelegate, 
     )
   }
 
-  private func showUpdateAvailableAlert(currentVersion: String, release: ReleaseInfo) {
-    let alert = NSAlert()
-    alert.messageText = String(format: L10n.text("update.availableTitle"), release.version)
-    var message = String(
-      format: L10n.text("update.availableMessage"),
-      currentVersion,
-      release.version
-    )
-    if let notes = release.notes, !notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-      message += "\n\n\(notes)"
-    }
-    alert.informativeText = message
-    alert.addButton(withTitle: L10n.text("update.openRelease"))
-    alert.addButton(withTitle: L10n.text("button.ok"))
-
-    if alert.runModal() == .alertFirstButtonReturn {
-      NSWorkspace.shared.open(release.url)
-    }
-  }
+  // private func showUpdateAvailableAlert(currentVersion: String, release: ReleaseInfo) {
+  //   let alert = NSAlert()
+  //   alert.messageText = String(format: L10n.text("update.availableTitle"), release.version)
+  //   var message = String(
+  //     format: L10n.text("update.availableMessage"),
+  //     currentVersion,
+  //     release.version
+  //   )
+  //   if let notes = release.notes, !notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+  //     message += "\n\n\(notes)"
+  //   }
+  //   alert.informativeText = message
+  //   alert.addButton(withTitle: L10n.text("update.openRelease"))
+  //   alert.addButton(withTitle: L10n.text("button.ok"))
+  //
+  //   if alert.runModal() == .alertFirstButtonReturn {
+  //     NSWorkspace.shared.open(release.url)
+  //   }
+  // }
 }

@@ -88,6 +88,13 @@
 "button.cancel" = "取消";
 "button.ok" = "好";
 
+"letsMove.title" = "将 Noti Shift 移到“应用程序”？";
+"letsMove.message" = "Noti Shift 放在“应用程序”文件夹中运行会更稳定。现在移动并从新位置重新打开吗？";
+"letsMove.moveButton" = "移到应用程序";
+"letsMove.notNowButton" = "暂不";
+"letsMove.errorTitle" = "无法移动 Noti Shift";
+"letsMove.errorMessage" = "Noti Shift 无法自动移动：%@\n\n你可以手动将它移到“应用程序”文件夹。";
+
 "onboarding.title" = "欢迎使用 Noti Shift";
 "onboarding.heading" = "设置通知横幅出现的位置";
 "onboarding.body" = "Noti Shift 在菜单栏中运行，并将 macOS 通知横幅移动到你选择的位置。";

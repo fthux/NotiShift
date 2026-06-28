@@ -6,8 +6,8 @@ enum PreferencesKey {
   static let debugLoggingEnabled = "debugLoggingEnabled"
   static let selectedLanguage = "selectedLanguage"
   static let selectedTheme = "selectedTheme"
-  static let automaticallyCheckForUpdates = "automaticallyCheckForUpdates"
-  static let lastUpdateCheckAt = "lastUpdateCheckAt"
+  // static let automaticallyCheckForUpdates = "automaticallyCheckForUpdates"
+  // static let lastUpdateCheckAt = "lastUpdateCheckAt"
   static let hasCompletedOnboarding = "hasCompletedOnboarding"
   static let lastOnboardingPromptVersion = "lastOnboardingPromptVersion"
 }
@@ -90,20 +90,20 @@ final class NotiShiftPreferences {
     }
   }
 
-  var automaticallyCheckForUpdates: Bool {
-    get {
-      if defaults.object(forKey: PreferencesKey.automaticallyCheckForUpdates) == nil { return true }
-      return defaults.bool(forKey: PreferencesKey.automaticallyCheckForUpdates)
-    }
-    set {
-      defaults.set(newValue, forKey: PreferencesKey.automaticallyCheckForUpdates)
-    }
-  }
-
-  var lastUpdateCheckAt: Date? {
-    get { defaults.object(forKey: PreferencesKey.lastUpdateCheckAt) as? Date }
-    set { defaults.set(newValue, forKey: PreferencesKey.lastUpdateCheckAt) }
-  }
+  // var automaticallyCheckForUpdates: Bool {
+  //   get {
+  //     if defaults.object(forKey: PreferencesKey.automaticallyCheckForUpdates) == nil { return true }
+  //     return defaults.bool(forKey: PreferencesKey.automaticallyCheckForUpdates)
+  //   }
+  //   set {
+  //     defaults.set(newValue, forKey: PreferencesKey.automaticallyCheckForUpdates)
+  //   }
+  // }
+  //
+  // var lastUpdateCheckAt: Date? {
+  //   get { defaults.object(forKey: PreferencesKey.lastUpdateCheckAt) as? Date }
+  //   set { defaults.set(newValue, forKey: PreferencesKey.lastUpdateCheckAt) }
+  // }
 
   var hasCompletedOnboarding: Bool {
     get { defaults.bool(forKey: PreferencesKey.hasCompletedOnboarding) }
