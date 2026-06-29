@@ -10,7 +10,7 @@ Control system notification banner position on macOS.
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/fthux/NotiShift)
 
-<img width="512" src="screenshots/notification.png" alt="Noti Shift showing notification banners in multiple positions" />
+<img width="512" src="screenshots/cover.png" alt="Control system notification banner position on macOS" />
 
 </div>
 
@@ -29,6 +29,12 @@ notishift
 ## Usage
 
 Noti Shift needs Accessibility permission to move notification banners。The app lives in the menu bar. You can set system notification banners to appear in 9 positions.
+
+<div align="center">
+
+<img width="512" src="screenshots/notification.png" alt="Noti Shift showing notification banners in multiple positions" />
+
+</div>
 
 ## Requirements
 

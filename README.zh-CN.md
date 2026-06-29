@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="NotiShift/Resources/NotiShiftIcon.png" alt="Noti Shift" width="120" />
+<img width="512" src="screenshots/cover.png" alt="Control system notification banner position on macOS" />
 
 # Noti Shift
 
@@ -29,6 +29,12 @@ notishift
 ## 使用
 
 Noti Shift 需要辅助功能权限才能移动通知横幅，应用会常驻菜单栏。可以将系统通知横幅设置到 9 个位置。
+
+<div align="center">
+
+<img width="512" src="screenshots/notification.png" alt="Noti Shift showing notification banners in multiple positions" />
+
+</div>
 
 ## 系统要求
 
