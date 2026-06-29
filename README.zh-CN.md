@@ -1,6 +1,6 @@
 <div align="center">
 
-<img width="512" src="screenshots/cover.png" alt="Control system notification banner position on macOS" />
+<img src="NotiShift/Resources/NotiShiftIcon.png" alt="Noti Shift" width="120" />
 
 # Noti Shift
 
@@ -9,8 +9,13 @@
 控制 macOS 系统通知横幅的位置。
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/fthux/NotiShift)
+[![GitHub top language](https://img.shields.io/github/languages/top/fthux/NotiShift?logo=github)](https://github.com/fthux/NotiShift/commits/master/)
+[![GitHub License](https://img.shields.io/github/license/fthux/NotiShift?logo=github)](LICENSE)
+[![Security](https://sonarcloud.io/api/project_badges/measure?project=fthux_NotiShift&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=fthux_NotiShift)
+[![Reliability](https://sonarcloud.io/api/project_badges/measure?project=fthux_NotiShift&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=fthux_NotiShift)
+[![Maintainability](https://sonarcloud.io/api/project_badges/measure?project=fthux_NotiShift&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=fthux_NotiShift)
 
-<img width="512" src="screenshots/notification.png" alt="Noti Shift 在多个位置显示通知横幅" />
+<img width="512" src="screenshots/cover.png" alt="C控制 macOS 系统通知横幅的位置" />
 
 </div>
 
